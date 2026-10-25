@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/main_shell.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/validation/input_validators.dart';
 import '../data/auth_service.dart';
 import 'register_page.dart';
 
@@ -21,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obscurePassword = true;
   bool _isSubmitting = false;
+  bool _isGoogleSigningIn = false;
 
   @override
   void dispose() {
@@ -29,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _goToMainApp() async {
+  Future<void> _login() async {
     if (_isSubmitting) return;
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -51,9 +53,9 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.of(context).pushReplacementNamed(MainShell.routeName);
     } on ApiException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -72,6 +74,95 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.of(context).pushNamed(RegisterPage.routeName);
   }
 
+  Future<void> _googleSignIn() async {
+    if (_isGoogleSigningIn) return;
+    setState(() {
+      _isGoogleSigningIn = true;
+    });
+
+    try {
+      await _authService.loginWithGoogle();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(MainShell.routeName);
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Google sign-in failed. Please try again.'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleSigningIn = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    final controller = TextEditingController(text: _emailController.text);
+    final email = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Reset password'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          maxLines: null, // Adds a new line automatically for long text
+          decoration: const InputDecoration(
+            labelText: 'Email address',
+            prefixIcon: Icon(Icons.mail_outline_rounded),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final error = InputValidators.gmail(controller.text);
+              if (error != null) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(error)));
+                return;
+              }
+              Navigator.of(dialogContext).pop(controller.text.trim());
+            },
+            child: const Text('Send link'),
+          ),
+        ],
+      ),
+    );
+    
+    // Wait for the dialog's closing animation to finish before disposing
+    Future.delayed(const Duration(milliseconds: 400), () {
+      controller.dispose();
+    });
+    
+    if (email == null || !mounted) return;
+
+    try {
+      final message = await _authService.requestPasswordReset(email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +173,10 @@ class _LoginPageState extends State<LoginPage> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: TweenAnimationBuilder<double>(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: const Duration(milliseconds: 420),
@@ -120,7 +214,10 @@ class _LoginPageState extends State<LoginPage> {
                               height: 58,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF2F6EFF), Color(0xFF1F49D8)],
+                                  colors: [
+                                    Color(0xFF2F6EFF),
+                                    Color(0xFF1F49D8),
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
@@ -133,7 +230,11 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ],
                               ),
-                              child: const Icon(Icons.shield_outlined, color: Colors.white, size: 30),
+                              child: const Icon(
+                                Icons.shield_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -162,7 +263,10 @@ class _LoginPageState extends State<LoginPage> {
                           const Text(
                             'Use your account to continue',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Color(0xFF6A7FA3), fontSize: 13.5),
+                            style: TextStyle(
+                              color: Color(0xFF6A7FA3),
+                              fontSize: 13.5,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           _InputShell(
@@ -184,7 +288,9 @@ class _LoginPageState extends State<LoginPage> {
                               decoration: InputDecoration(
                                 labelText: 'Password',
                                 hintText: 'Enter your password',
-                                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline_rounded,
+                                ),
                                 suffixIcon: IconButton(
                                   onPressed: () {
                                     setState(() {
@@ -192,7 +298,9 @@ class _LoginPageState extends State<LoginPage> {
                                     });
                                   },
                                   icon: Icon(
-                                    _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                    _obscurePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
                                   ),
                                 ),
                               ),
@@ -202,7 +310,7 @@ class _LoginPageState extends State<LoginPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: _forgotPassword,
                               child: const Text('Forgot password?'),
                             ),
                           ),
@@ -216,11 +324,15 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: const [
-                                BoxShadow(color: Color(0x402F6EFF), blurRadius: 12, offset: Offset(0, 5)),
+                                BoxShadow(
+                                  color: Color(0x402F6EFF),
+                                  blurRadius: 12,
+                                  offset: Offset(0, 5),
+                                ),
                               ],
                             ),
                             child: FilledButton.icon(
-                              onPressed: _isSubmitting ? null : _goToMainApp,
+                              onPressed: _isSubmitting ? null : _login,
                               icon: _isSubmitting
                                   ? const SizedBox(
                                       width: 18,
@@ -231,28 +343,83 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                                     )
                                   : const Icon(Icons.login_rounded),
-                              label: Text(_isSubmitting ? 'Signing in...' : 'Log In'),
+                              label: Text(
+                                _isSubmitting ? 'Signing in...' : 'Log In',
+                              ),
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              const Expanded(
+                                child: Divider(color: Color(0xFFDCE5F5)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Text(
+                                  'or',
+                                  style: TextStyle(
+                                    color: const Color(0xFF6A7FA3),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              const Expanded(
+                                child: Divider(color: Color(0xFFDCE5F5)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
                           OutlinedButton.icon(
-                            onPressed: _goToMainApp,
-                            icon: const Icon(Icons.person_outline_rounded),
-                            label: const Text('Continue as Guest'),
+                            onPressed:
+                                _isGoogleSigningIn ? null : _googleSignIn,
+                            icon: _isGoogleSigningIn
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.2,
+                                    ),
+                                  )
+                                : Image.network(
+                                    'https://developers.google.com/identity/images/g-logo.png',
+                                    width: 20,
+                                    height: 20,
+                                    errorBuilder: (_, __, ___) =>
+                                        const Icon(Icons.g_mobiledata),
+                                  ),
+                            label: Text(
+                              _isGoogleSigningIn
+                                  ? 'Signing in...'
+                                  : 'Continue with Google',
+                            ),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF2F6EFF),
-                              side: const BorderSide(color: Color(0xFFCCD7EF), width: 1.4),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              foregroundColor: const Color(0xFF12284B),
+                              side: const BorderSide(
+                                color: Color(0xFFCCD7EF),
+                                width: 1.4,
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
                           ),
+
                           const SizedBox(height: 8),
                           Wrap(
                             alignment: WrapAlignment.center,
@@ -279,12 +446,20 @@ class _LoginPageState extends State<LoginPage> {
                             child: const Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF2F6EFF)),
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 16,
+                                  color: Color(0xFF2F6EFF),
+                                ),
                                 SizedBox(width: 7),
                                 Expanded(
                                   child: Text(
                                     'Need help signing in? Contact your Barangay Hall for account assistance.',
-                                    style: TextStyle(color: Color(0xFF607A9E), fontSize: 12.5, height: 1.35),
+                                    style: TextStyle(
+                                      color: Color(0xFF607A9E),
+                                      fontSize: 12.5,
+                                      height: 1.35,
+                                    ),
                                   ),
                                 ),
                               ],

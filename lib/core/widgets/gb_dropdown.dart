@@ -101,7 +101,7 @@ class _GbDropdownState extends State<GbDropdown> with SingleTickerProviderStateM
                   child: FadeTransition(
                     opacity: _fadeAnimation,
                     child: SizeTransition(
-                      axisAlignment: -1,
+                      alignment: Alignment.topCenter,
                       sizeFactor: _sizeAnimation,
                       child: Container(
                         constraints: BoxConstraints(maxHeight: availableBelow),

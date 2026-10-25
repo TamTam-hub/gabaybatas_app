@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -35,6 +36,106 @@ class ApiClient {
     bool authenticated = false,
   }) async {
     return _request('PATCH', path, body: body, authenticated: authenticated);
+  }
+
+  Future<Map<String, dynamic>> delete(
+    String path, {
+    bool authenticated = false,
+  }) async {
+    return _request('DELETE', path, authenticated: authenticated);
+  }
+
+  Future<Uint8List> getBytes(String path, {bool authenticated = false}) async {
+    final headers = <String, String>{'Accept': '*/*'};
+    if (authenticated) {
+      final token = await SessionStore.getToken();
+      if (token == null || token.isEmpty) {
+        throw ApiException('You are not logged in. Please sign in first.');
+      }
+      headers['Authorization'] = 'Bearer $token';
+    }
+    try {
+      final response = await http
+          .get(_buildUri(path), headers: headers)
+          .timeout(AppConfig.requestTimeout);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw ApiException('Unable to load evidence.', statusCode: response.statusCode);
+      }
+      return response.bodyBytes;
+    } catch (error) {
+      if (error is ApiException) rethrow;
+      throw ApiException('Unable to load evidence.');
+    }
+  }
+
+  Future<Map<String, String>> requestHeaders({
+    bool authenticated = false,
+  }) async {
+    final headers = <String, String>{};
+    if (!authenticated) return headers;
+    final token = await SessionStore.getToken();
+    if (token == null || token.isEmpty) {
+      throw ApiException('You are not logged in. Please sign in first.');
+    }
+    headers['Authorization'] = 'Bearer $token';
+    return headers;
+  }
+
+  Uri buildUri(String path) => _buildUri(path);
+  Future<Map<String, dynamic>> postMultipart(
+    String path, {
+    required Map<String, String> fields,
+    required Map<String, String> filePaths,
+    Map<String, List<String>> fileLists = const <String, List<String>>{},
+    bool authenticated = false,
+  }) async {
+    final request = http.MultipartRequest('POST', _buildUri(path));
+    request.headers['Accept'] = 'application/json';
+
+    if (authenticated) {
+      final token = await SessionStore.getToken();
+      if (token == null || token.isEmpty) {
+        throw ApiException('You are not logged in. Please sign in first.');
+      }
+      request.headers['Authorization'] = 'Bearer $token';
+    }
+
+    request.fields.addAll(fields);
+    try {
+      for (final entry in filePaths.entries) {
+        request.files.add(await http.MultipartFile.fromPath(entry.key, entry.value));
+      }
+      for (final entry in fileLists.entries) {
+        for (final path in entry.value) {
+          request.files.add(await http.MultipartFile.fromPath(entry.key, path));
+        }
+      }
+    } catch (_) {
+      throw ApiException('The selected image could not be read. Please capture or choose it again.');
+    }
+
+    late final http.StreamedResponse streamedResponse;
+    try {
+      streamedResponse = await request.send().timeout(AppConfig.requestTimeout);
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw ApiException('Unable to connect to server. Check API_BASE_URL and network.');
+    }
+
+    final response = await http.Response.fromStream(streamedResponse);
+    final decoded = _decodeBody(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final message = decoded['message']?.toString() ?? 'Request failed (${response.statusCode}).';
+      throw ApiException(message, statusCode: response.statusCode);
+    }
+
+    if (decoded['success'] == false) {
+      final message = decoded['message']?.toString() ?? 'Request failed.';
+      throw ApiException(message, statusCode: response.statusCode);
+    }
+
+    return decoded;
   }
 
   Future<Map<String, dynamic>> _request(
@@ -77,6 +178,9 @@ class ApiClient {
           response = await http
               .patch(uri, headers: headers, body: jsonEncode(body ?? <String, dynamic>{}))
               .timeout(AppConfig.requestTimeout);
+          break;
+        case 'DELETE':
+          response = await http.delete(uri, headers: headers).timeout(AppConfig.requestTimeout);
           break;
         default:
           throw ApiException('Unsupported method: $method');

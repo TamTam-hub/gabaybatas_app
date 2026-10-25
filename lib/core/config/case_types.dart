@@ -5,11 +5,21 @@ const List<String> kCaseTypes = <String>[
   'Theft',
   'Physical Injury',
   'Property Damage',
-  'Domestic Dispute',
+  'Family Dispute (No Violence)',
   'Threat or Harassment',
   'Noise Complaint',
   'Boundary Dispute',
+  'Unpaid Debt or Money Claim',
+  'Oral Defamation (Slight)',
+  'Trespassing',
+  'Rental Dispute',
+  'Swindling or Estafa (Small Amount)',
+  'Other Dispute',
 ];
+
+/// Case type that may involve violence against women or children, which
+/// cannot go through barangay mediation (RA 9262).
+const String kFamilyDisputeCaseType = 'Family Dispute (No Violence)';
 
 const Map<String, List<String>> kCaseTypeKeywords = <String, List<String>>{
   'Public Disturbance': <String>[
@@ -39,11 +49,11 @@ const Map<String, List<String>> kCaseTypeKeywords = <String, List<String>>{
     'destroy',
     'vandal',
   ],
-  'Domestic Dispute': <String>[
+  'Family Dispute (No Violence)': <String>[
     'domestic',
     'family',
     'household',
-    'spouse',
+    'relatives',
   ],
   'Threat or Harassment': <String>[
     'threat',
@@ -64,6 +74,43 @@ const Map<String, List<String>> kCaseTypeKeywords = <String, List<String>>{
     'property line',
     'survey',
   ],
+  'Unpaid Debt or Money Claim': <String>[
+    'debt',
+    'utang',
+    'loan',
+    'payment',
+    'money',
+  ],
+  'Oral Defamation (Slight)': <String>[
+    'slander',
+    'defamation',
+    'insult',
+    'gossip',
+  ],
+  'Trespassing': <String>[
+    'trespass',
+    'entered',
+    'intrude',
+    'property',
+  ],
+  'Rental Dispute': <String>[
+    'rent',
+    'tenant',
+    'landlord',
+    'lease',
+    'eviction',
+  ],
+  'Swindling or Estafa (Small Amount)': <String>[
+    'swindle',
+    'estafa',
+    'scam',
+    'fraud',
+  ],
+  'Other Dispute': <String>[
+    'other',
+    'dispute',
+    'complaint',
+  ],
 };
 
 const Map<String, String> kCaseTypeCategoryHints = <String, String>{
@@ -71,8 +118,15 @@ const Map<String, String> kCaseTypeCategoryHints = <String, String>{
   'Theft': 'property',
   'Physical Injury': 'civil',
   'Property Damage': 'property',
-  'Domestic Dispute': 'family',
+  'Family Dispute (No Violence)': 'family',
   'Threat or Harassment': 'general',
   'Noise Complaint': 'general',
   'Boundary Dispute': 'property',
+  'Unpaid Debt or Money Claim': 'civil',
+  'Oral Defamation (Slight)': 'general',
+  'Trespassing': 'property',
+  'Rental Dispute': 'civil',
+  'Swindling or Estafa (Small Amount)': 'property',
+  'Other Dispute': 'general',
 };
+

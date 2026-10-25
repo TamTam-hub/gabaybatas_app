@@ -44,18 +44,7 @@ class _ApiSmokeTestPageState extends State<ApiSmokeTestPage> {
   String _generatedEmail = _buildGeneratedEmail();
   List<_StepResult> _results = const <_StepResult>[];
 
-  static const List<String> _barangays = <String>[
-    'Barangay Muñoz',
-    'Barangay San Pablo',
-    'Barangay Burak',
-    'Barangay 1',
-    'Barangay 2',
-    'Barangay 3',
-    'Barangay 4',
-    'Barangay 5',
-  ];
-
-  String _selectedBarangay = _barangays.first;
+  String _selectedBarangay = AppConfig.supportedBarangay;
 
   static String _buildGeneratedEmail() {
     final stamp = DateTime.now().millisecondsSinceEpoch;
@@ -152,7 +141,14 @@ class _ApiSmokeTestPageState extends State<ApiSmokeTestPage> {
             await runStep('5. Submit case', () async {
               await _submitCaseService.submitCase(
                 name: _fullNameController.text.trim(),
+                complainantAddress:
+                    'Smoke Test Address, Barangay Muñoz, Catbalogan City, Samar',
+                complainantLocation: 'Barangay Muñoz',
+                complainantAge: _ageController.text.trim(),
                 complainedPerson: 'Smoke Test Respondent',
+                respondentAddress:
+                    'Respondent Address, Barangay Muñoz, Catbalogan City, Samar',
+                respondentLocation: 'Barangay Muñoz',
                 barangay: _selectedBarangay,
                 contact: _phoneController.text.trim(),
                 caseType: 'Public Disturbance',
@@ -267,7 +263,7 @@ class _ApiSmokeTestPageState extends State<ApiSmokeTestPage> {
                     Expanded(
                       flex: 2,
                       child: GbDropdown(
-                        items: _barangays,
+                        items: AppConfig.supportedBarangays,
                         value: _selectedBarangay,
                         label: 'Barangay',
                         prefixIcon: Icons.location_on_outlined,

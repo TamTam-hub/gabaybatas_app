@@ -9,6 +9,7 @@ class GbBlueHeader extends StatelessWidget {
     this.showBack = false,
     this.onBack,
     this.bottom,
+    this.titleFontSize = 31,
     super.key,
   });
 
@@ -19,6 +20,7 @@ class GbBlueHeader extends StatelessWidget {
   final bool showBack;
   final VoidCallback? onBack;
   final Widget? bottom;
+  final double titleFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +81,16 @@ class GbBlueHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: IconButton(
                       onPressed: onBack,
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                      ),
                       color: Colors.white,
                     ),
                   ),
@@ -93,19 +100,23 @@ class GbBlueHeader extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 31,
                     height: 1.05,
                     letterSpacing: 0.2,
-                  ),
+                  ).copyWith(fontSize: titleFontSize),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Text(
                       subtitle!,
@@ -125,7 +136,9 @@ class GbBlueHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.24),
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x1A102E75),
@@ -145,10 +158,7 @@ class GbBlueHeader extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (bottom != null) ...[
-                  const SizedBox(height: 16),
-                  bottom!,
-                ],
+                if (bottom != null) ...[const SizedBox(height: 16), bottom!],
               ],
             ),
           ),

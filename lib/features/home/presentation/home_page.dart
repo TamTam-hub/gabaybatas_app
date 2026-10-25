@@ -67,9 +67,9 @@ class _HomePageState extends State<HomePage> {
         GbBlueHeader(
           topContent: const _BrandTopRow(),
           title: 'Welcome, $_residentName',
-          subtitle: 'Resident Portal',
           description:
               'Your digital legal companion for filing concerns, tracking progress, and accessing trusted barangay-level legal guidance.',
+          titleFontSize: 27,
         ),
         const SizedBox(height: 14),
         _AnimatedItem(
@@ -116,7 +116,11 @@ class _HomePageState extends State<HomePage> {
           child: const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline_rounded, color: Color(0xFFB26400), size: 18),
+              Icon(
+                Icons.info_outline_rounded,
+                color: Color(0xFFB26400),
+                size: 18,
+              ),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -140,31 +144,22 @@ class _BrandTopRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _BrandLogoChip(),
         SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'GabayBatas',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 24,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.2,
-                ),
-              ),
-              SizedBox(height: 2),
-              Text(
-                'Barangay legal support and case tracking in one trusted app.',
-                style: TextStyle(
-                  color: Color(0xFFEAF0FF),
-                  fontSize: 12.8,
-                  height: 1.25,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -257,7 +252,11 @@ class _ActionCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: color.withValues(alpha: 0.34), blurRadius: 18, offset: const Offset(0, 8)),
+          BoxShadow(
+            color: color.withValues(alpha: 0.34),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
       child: Material(
@@ -275,7 +274,9 @@ class _ActionCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
                   ),
                   alignment: Alignment.center,
                   child: Icon(icon, color: Colors.white, size: 28),
@@ -287,17 +288,28 @@ class _ActionCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(color: Colors.white, fontSize: 29 / 1.6, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 29 / 1.6,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         subtitle,
-                        style: const TextStyle(color: Color(0xE8FFFFFF), fontSize: 15),
+                        style: const TextStyle(
+                          color: Color(0xE8FFFFFF),
+                          fontSize: 15,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 28),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ],
             ),
           ),

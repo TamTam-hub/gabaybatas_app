@@ -1,8 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/config/app_config.dart';
 import '../../../core/network/api_exception.dart';
-import '../../../core/widgets/gb_dropdown.dart';
+import '../../../core/validation/input_validators.dart';
 import '../data/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -22,23 +25,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
-  String? _selectedBarangay;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _isSubmitting = false;
-
-  static const List<String> _barangays = [
-    'Barangay Muñoz',
-    'Barangay San Pablo',
-    'Barangay Burak',
-    'Barangay 1',
-    'Barangay 2',
-    'Barangay 3',
-    'Barangay 4',
-    'Barangay 5',
-  ];
 
   @override
   void dispose() {
@@ -55,13 +47,6 @@ class _RegisterPageState extends State<RegisterPage> {
     if (_isSubmitting) return;
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) return;
-    if (_selectedBarangay == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select your barangay.')),
-      );
-      return;
-    }
-
     setState(() {
       _isSubmitting = true;
     });
@@ -70,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
       await _authService.register(
         fullName: _fullNameController.text.trim(),
         age: _ageController.text.trim(),
-        barangay: _selectedBarangay!,
+        barangay: AppConfig.supportedBarangay,
         contactNumber: _phoneController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -79,14 +64,16 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created. You can now sign in.')),
+        const SnackBar(
+          content: Text('Check your Gmail inbox to verify your account.'),
+        ),
       );
       Navigator.of(context).pop();
     } on ApiException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -120,7 +107,11 @@ class _RegisterPageState extends State<RegisterPage> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: const [
-                        BoxShadow(color: Color(0x1A12284B), blurRadius: 24, offset: Offset(0, 10)),
+                        BoxShadow(
+                          color: Color(0x1A12284B),
+                          blurRadius: 24,
+                          offset: Offset(0, 10),
+                        ),
                       ],
                     ),
                     child: Form(
@@ -139,14 +130,21 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 child: IconButton(
                                   onPressed: () => Navigator.of(context).pop(),
-                                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+                                  icon: const Icon(
+                                    Icons.arrow_back_ios_new_rounded,
+                                    size: 16,
+                                  ),
                                   color: const Color(0xFF2F6EFF),
                                 ),
                               ),
                               const Spacer(),
                               const Text(
                                 'GabayBatas',
-                                style: TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF2F6EFF), fontSize: 16),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF2F6EFF),
+                                  fontSize: 16,
+                                ),
                               ),
                               const Spacer(),
                               const SizedBox(width: 40),
@@ -156,13 +154,20 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Text(
                             'Create account',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF12284B)),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF12284B),
+                            ),
                           ),
                           const SizedBox(height: 4),
                           const Text(
                             'Set up your resident profile for case filing and tracking.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Color(0xFF607A9E), height: 1.35),
+                            style: TextStyle(
+                              color: Color(0xFF607A9E),
+                              height: 1.35,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           _Label('Personal Details'),
@@ -170,8 +175,14 @@ class _RegisterPageState extends State<RegisterPage> {
                             child: TextFormField(
                               controller: _fullNameController,
                               textCapitalization: TextCapitalization.words,
-                              decoration: const InputDecoration(labelText: 'Full name', prefixIcon: Icon(Icons.person_outline_rounded)),
-                              validator: (value) => (value == null || value.trim().isEmpty) ? 'Full name is required' : null,
+                              decoration: const InputDecoration(
+                                labelText: 'Full name',
+                                prefixIcon: Icon(Icons.person_outline_rounded),
+                              ),
+                              validator: (value) =>
+                                  (value == null || value.trim().isEmpty)
+                                  ? 'Full name is required'
+                                  : null,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -183,27 +194,28 @@ class _RegisterPageState extends State<RegisterPage> {
                                   child: TextFormField(
                                     controller: _ageController,
                                     keyboardType: TextInputType.number,
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                    decoration: const InputDecoration(labelText: 'Age', prefixIcon: Icon(Icons.cake_outlined)),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) return 'Required';
-                                      final parsed = int.tryParse(value);
-                                      if (parsed == null || parsed < 12 || parsed > 120) return 'Invalid age';
-                                      return null;
-                                    },
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    decoration: const InputDecoration(
+                                      labelText: 'Age',
+                                      prefixIcon: Icon(Icons.cake_outlined),
+                                    ),
+                                    validator: InputValidators.age,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 flex: 3,
-                                child: GbDropdown(
-                                  items: _barangays,
-                                  value: _selectedBarangay,
-                                  label: 'Barangay',
-                                  prefixIcon: Icons.location_on_outlined,
-                                  onChanged: (value) => setState(() => _selectedBarangay = value),
-                                  validator: (value) => (value == null || value.isEmpty) ? 'Required' : null,
+                                child: InputDecorator(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Barangay',
+                                    prefixIcon: Icon(
+                                      Icons.location_on_outlined,
+                                    ),
+                                  ),
+                                  child: Text(AppConfig.supportedBarangay),
                                 ),
                               ),
                             ],
@@ -213,13 +225,16 @@ class _RegisterPageState extends State<RegisterPage> {
                             child: TextFormField(
                               controller: _phoneController,
                               keyboardType: TextInputType.phone,
-                              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+ -]'))],
-                              decoration: const InputDecoration(labelText: 'Contact number', prefixIcon: Icon(Icons.call_outlined)),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) return 'Contact number is required';
-                                if (value.trim().length < 10) return 'Enter a valid number';
-                                return null;
-                              },
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9+ -]'),
+                                ),
+                              ],
+                              decoration: const InputDecoration(
+                                labelText: 'Contact number',
+                                prefixIcon: Icon(Icons.call_outlined),
+                              ),
+                              validator: InputValidators.phone,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -227,12 +242,11 @@ class _RegisterPageState extends State<RegisterPage> {
                             child: TextFormField(
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(labelText: 'Email address', prefixIcon: Icon(Icons.mail_outline_rounded)),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) return 'Email is required';
-                                if (!value.contains('@') || !value.contains('.')) return 'Enter a valid email';
-                                return null;
-                              },
+                              decoration: const InputDecoration(
+                                labelText: 'Email address',
+                                prefixIcon: Icon(Icons.mail_outline_rounded),
+                              ),
+                              validator: InputValidators.gmail,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -243,17 +257,21 @@ class _RegisterPageState extends State<RegisterPage> {
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
                                 labelText: 'Password',
-                                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline_rounded,
+                                ),
                                 suffixIcon: IconButton(
-                                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                                  icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                  ),
                                 ),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) return 'Password is required';
-                                if (value.length < 8) return 'At least 8 characters';
-                                return null;
-                              },
+                              validator: InputValidators.password,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -263,15 +281,27 @@ class _RegisterPageState extends State<RegisterPage> {
                               obscureText: _obscureConfirm,
                               decoration: InputDecoration(
                                 labelText: 'Confirm password',
-                                prefixIcon: const Icon(Icons.verified_user_outlined),
+                                prefixIcon: const Icon(
+                                  Icons.verified_user_outlined,
+                                ),
                                 suffixIcon: IconButton(
-                                  onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                                  icon: Icon(_obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                                  onPressed: () => setState(
+                                    () => _obscureConfirm = !_obscureConfirm,
+                                  ),
+                                  icon: Icon(
+                                    _obscureConfirm
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                  ),
                                 ),
                               ),
                               validator: (value) {
-                                if (value == null || value.isEmpty) return 'Please confirm password';
-                                if (value != _passwordController.text) return 'Passwords do not match';
+                                if (value == null || value.isEmpty) {
+                                  return 'Please confirm password';
+                                }
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match';
+                                }
                                 return null;
                               },
                             ),
@@ -286,7 +316,11 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: const [
-                                BoxShadow(color: Color(0x4D2F6EFF), blurRadius: 14, offset: Offset(0, 6)),
+                                BoxShadow(
+                                  color: Color(0x4D2F6EFF),
+                                  blurRadius: 14,
+                                  offset: Offset(0, 6),
+                                ),
                               ],
                             ),
                             child: FilledButton.icon(
@@ -301,13 +335,21 @@ class _RegisterPageState extends State<RegisterPage> {
                                       ),
                                     )
                                   : const Icon(Icons.person_add_alt_1_rounded),
-                              label: Text(_isSubmitting ? 'Creating account...' : 'Create account'),
+                              label: Text(
+                                _isSubmitting
+                                    ? 'Creating account...'
+                                    : 'Create account',
+                              ),
                               style: FilledButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
                               ),
                             ),
                           ),
@@ -315,8 +357,14 @@ class _RegisterPageState extends State<RegisterPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('Already have an account?', style: TextStyle(color: Color(0xFF607A9E))),
-                              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Sign in')),
+                              const Text(
+                                'Already have an account?',
+                                style: TextStyle(color: Color(0xFF607A9E)),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Sign in'),
+                              ),
                             ],
                           ),
                         ],
@@ -400,9 +448,21 @@ class _Backdrop extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          Positioned(top: -80, right: -70, child: _blurCircle(const Color(0xFF2F6EFF), 230, 0.11)),
-          Positioned(bottom: -90, left: -80, child: _blurCircle(const Color(0xFF1F49D8), 250, 0.09)),
-          Positioned(top: 210, left: 26, child: _blurCircle(const Color(0xFFFFC533), 100, 0.08)),
+          Positioned(
+            top: -80,
+            right: -70,
+            child: _blurCircle(const Color(0xFF2F6EFF), 230, 0.11),
+          ),
+          Positioned(
+            bottom: -90,
+            left: -80,
+            child: _blurCircle(const Color(0xFF1F49D8), 250, 0.09),
+          ),
+          Positioned(
+            top: 210,
+            left: 26,
+            child: _blurCircle(const Color(0xFFFFC533), 100, 0.08),
+          ),
         ],
       ),
     );

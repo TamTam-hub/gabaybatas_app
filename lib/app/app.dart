@@ -42,9 +42,7 @@ class _StartupGateState extends State<_StartupGate> {
   }
 
   Future<String?> _resolveStartup() async {
-    final tokenFuture = SessionStore.getToken();
-    await Future<void>.delayed(const Duration(milliseconds: 1300));
-    return tokenFuture;
+    return SessionStore.getToken();
   }
 
   @override

@@ -1,4 +1,5 @@
 import '../../../core/network/api_client.dart';
+import '../../../core/network/api_exception.dart';
 
 class ProfileData {
   ProfileData({
@@ -37,7 +38,8 @@ class ProfileData {
 }
 
 class ProfileService {
-  ProfileService({ApiClient? apiClient}) : _apiClient = apiClient ?? const ApiClient();
+  ProfileService({ApiClient? apiClient})
+    : _apiClient = apiClient ?? const ApiClient();
 
   final ApiClient _apiClient;
 
@@ -48,14 +50,23 @@ class ProfileService {
     final source = response['data'] is Map<String, dynamic>
         ? response['data'] as Map<String, dynamic>
         : response;
-    return ProfileData.fromJson(source);
+    final profile = ProfileData.fromJson(source);
+    if (profile.name.trim().isEmpty || profile.email.trim().isEmpty) {
+      throw ApiException('The server returned an incomplete profile.');
+    }
+    return profile;
   }
 
-  Future<void> updateProfile(ProfileData profile) async {
+  Future<ProfileData> updateProfile(ProfileData profile) async {
     await _apiClient.put(
       profilePath,
       body: profile.toJson(),
       authenticated: true,
     );
+    final updated = await fetchProfile();
+    if (updated == null) {
+      throw ApiException('The server did not return the updated profile.');
+    }
+    return updated;
   }
 }

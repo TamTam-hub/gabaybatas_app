@@ -33,21 +33,40 @@ class SubmitCaseService {
 
   Future<SubmitCaseResult> submitCase({
     required String name,
+    required String complainantAddress,
+    required String complainantLocation,
+    required String complainantAge,
     required String complainedPerson,
+    required String respondentAddress,
+    required String respondentLocation,
     required String barangay,
     required String contact,
     required String caseType,
     required String description,
+    List<String> evidenceImagePaths = const <String>[],
+    String? evidenceVideoPath,
   }) async {
-    final response = await _apiClient.post(
+    final response = await _apiClient.postMultipart(
       submitPath,
-      body: <String, dynamic>{
+      fields: <String, String>{
         'name': name,
+        'complainant_address': complainantAddress,
+        'complainant_location': complainantLocation,
+        'complainant_age': complainantAge,
         'complained_person': complainedPerson,
+        'respondent_address': respondentAddress,
+        'respondent_location': respondentLocation,
         'barangay': barangay,
         'contact': contact,
         'case_type': caseType,
         'description': description,
+      },
+      filePaths: <String, String>{
+        if (evidenceVideoPath != null) 'evidence_video': evidenceVideoPath,
+      },
+      fileLists: <String, List<String>>{
+        if (evidenceImagePaths.isNotEmpty)
+          'evidence_images[]': evidenceImagePaths,
       },
       authenticated: true,
     );
@@ -61,8 +80,16 @@ class SubmitCaseService {
         : payload;
 
     final normalized = <String, dynamic>{
-      'case_id': caseData['case_id'] ?? caseData['reference_number'] ?? caseData['id'] ?? '',
-      'reference_number': caseData['case_id'] ?? caseData['reference_number'] ?? caseData['id'] ?? '',
+      'case_id':
+          caseData['case_id'] ??
+          caseData['reference_number'] ??
+          caseData['id'] ??
+          '',
+      'reference_number':
+          caseData['case_id'] ??
+          caseData['reference_number'] ??
+          caseData['id'] ??
+          '',
       'status': caseData['status'] ?? '',
       'created_at': caseData['created_at'] ?? '',
     };

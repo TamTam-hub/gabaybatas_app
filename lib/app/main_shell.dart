@@ -13,12 +13,41 @@ class MainShell extends StatefulWidget {
 
   static const String routeName = '/main';
 
+  static const int chatTab = 3;
+
+  static final ValueNotifier<int?> _tabRequest = ValueNotifier<int?>(null);
+
+  /// Closes any pages opened on top of the shell and switches to [index].
+  static void openTab(BuildContext context, int index) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    _tabRequest.value = index;
+  }
+
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    MainShell._tabRequest.addListener(_handleTabRequest);
+  }
+
+  @override
+  void dispose() {
+    MainShell._tabRequest.removeListener(_handleTabRequest);
+    super.dispose();
+  }
+
+  void _handleTabRequest() {
+    final index = MainShell._tabRequest.value;
+    if (index == null) return;
+    MainShell._tabRequest.value = null;
+    _onTabSelected(index);
+  }
 
   void _onTabSelected(int index) {
     setState(() {
@@ -32,7 +61,18 @@ class _MainShellState extends State<MainShell> {
       HomePage(
         onSubmitTap: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SubmitCasePage()),
+            MaterialPageRoute(
+              builder: (_) => SubmitCasePage(
+                onSubmitted: (message) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(message),
+                      backgroundColor: const Color(0xFF168548),
+                    ),
+                  );
+                },
+              ),
+            ),
           );
         },
         onTrackTap: () => _onTabSelected(1),
@@ -50,10 +90,13 @@ class _MainShellState extends State<MainShell> {
         switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeInCubic,
         transitionBuilder: (child, animation) {
-          final slide = Tween<Offset>(
-            begin: const Offset(0.06, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+          final slide =
+              Tween<Offset>(
+                begin: const Offset(0.06, 0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              );
 
           return FadeTransition(
             opacity: animation,
