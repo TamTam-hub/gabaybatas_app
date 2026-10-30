@@ -8,6 +8,7 @@ import '../../../core/widgets/gb_dialog.dart';
 import '../../../core/validation/input_validators.dart';
 import '../data/profile_service.dart';
 import '../../auth/presentation/login_page.dart';
+import '../../verification/data/residency_verification_service.dart';
 import '../../verification/presentation/residency_verification_page.dart';
 
 class AboutPage extends StatefulWidget {
@@ -38,10 +39,36 @@ class _AboutPageState extends State<AboutPage> {
   ProfileData? _loadedProfile;
   ProfileData? _editSnapshot;
 
+  final ResidencyVerificationService _verificationService =
+      ResidencyVerificationService();
+  // Latest residency verification status for the badge: '' = never
+  // submitted, null = not loaded (no badge shown).
+  String? _verificationStatus;
+
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _loadVerificationStatus();
+  }
+
+  Future<void> _loadVerificationStatus() async {
+    try {
+      final verification = await _verificationService.fetchLatest();
+      if (!mounted) return;
+      setState(() {
+        _verificationStatus = verification?.status.trim().toLowerCase() ?? '';
+      });
+    } catch (_) {
+      // The badge is only a hint; the verification page shows any error.
+    }
+  }
+
+  Future<void> _openResidencyVerification() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ResidencyVerificationPage()),
+    );
+    if (mounted) _loadVerificationStatus();
   }
 
   @override
@@ -448,15 +475,23 @@ class _AboutPageState extends State<AboutPage> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const ResidencyVerificationPage(),
-                      ),
-                    );
-                  },
+                  onPressed: _openResidencyVerification,
                   icon: const Icon(Icons.verified_user_outlined),
-                  label: const Text('Verify Residency'),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Flexible(
+                        child: Text(
+                          'Verify Residency',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (_verificationStatus != null) ...[
+                        const SizedBox(width: 8),
+                        _VerificationBadge(status: _verificationStatus!),
+                      ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -644,6 +679,41 @@ class _ProfileField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFDCE5F5)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Residency verification status shown on the Verify Residency button.
+/// Colours match the status card on the verification page.
+class _VerificationBadge extends StatelessWidget {
+  const _VerificationBadge({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final (String label, Color color) = switch (status) {
+      'approved' => ('Verified', const Color(0xFF168548)),
+      'pending' => ('Pending', const Color(0xFFB06B00)),
+      'resubmit' => ('Action needed', const Color(0xFFC43D35)),
+      'rejected' => ('Rejected', const Color(0xFFC43D35)),
+      _ => ('Not verified', const Color(0xFF607A9E)),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

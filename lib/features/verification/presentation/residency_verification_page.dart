@@ -42,6 +42,7 @@ class _ResidencyVerificationPageState extends State<ResidencyVerificationPage> {
   ResidencyVerification? _verification;
   bool _loading = true;
   bool _submitting = false;
+  String? _loadError;
 
   @override
   void initState() {
@@ -56,6 +57,14 @@ class _ResidencyVerificationPageState extends State<ResidencyVerificationPage> {
     _addressController.dispose();
     _last4Controller.dispose();
     super.dispose();
+  }
+
+  void _retryLoad() {
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
+    _loadVerification();
   }
 
   Future<void> _loadVerification() async {
@@ -76,8 +85,23 @@ class _ResidencyVerificationPageState extends State<ResidencyVerificationPage> {
         }
         _loading = false;
       });
+    } on ApiException catch (error) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = error.message;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      // Without the latest status the form must stay hidden, or a pending
+      // resident would be shown an empty form as if nothing was submitted.
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError =
+              'Unable to load your verification status. Check your connection and try again.';
+        });
+      }
     }
   }
 
@@ -233,7 +257,12 @@ class _ResidencyVerificationPageState extends State<ResidencyVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Center(child: CircularProgressIndicator());
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF5F7FB),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
@@ -249,8 +278,13 @@ class _ResidencyVerificationPageState extends State<ResidencyVerificationPage> {
             onBack: () => Navigator.of(context).pop(),
           ),
           const SizedBox(height: 14),
-          if (_verification != null) _StatusCard(verification: _verification!),
-          if (_canSubmit) _buildForm(),
+          if (_loadError != null)
+            _LoadErrorCard(message: _loadError!, onRetry: _retryLoad)
+          else ...[
+            if (_verification != null)
+              _StatusCard(verification: _verification!),
+            if (_canSubmit) _buildForm(),
+          ],
         ],
       ),
     );
@@ -396,7 +430,8 @@ class _StatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final status = verification.status.toLowerCase();
     final isApproved = status == 'approved';
-    final isRejected = status == 'rejected' || status == 'resubmit';
+    final isResubmit = status == 'resubmit';
+    final isRejected = status == 'rejected' || isResubmit;
     final color = isApproved
         ? const Color(0xFF168548)
         : isRejected
@@ -404,9 +439,18 @@ class _StatusCard extends StatelessWidget {
         : const Color(0xFFB06B00);
     final title = isApproved
         ? 'Residency verified'
-        : isRejected
+        : isResubmit
         ? 'Resubmission required'
+        : isRejected
+        ? 'Verification rejected'
         : 'Verification pending';
+    final hint = isApproved
+        ? 'Your residency has been verified. You can now submit cases.'
+        : isResubmit
+        ? 'Please correct your details and attach your documents again below.'
+        : isRejected
+        ? 'You may submit a new verification request below.'
+        : 'Barangay staff will review your submission.';
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 18),
       padding: const EdgeInsets.all(16),
@@ -441,19 +485,60 @@ class _StatusCard extends StatelessWidget {
                 ),
                 if (verification.reviewerNote.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(verification.reviewerNote),
+                  Text('Note from the barangay: ${verification.reviewerNote}'),
                 ],
-                if (!isRejected) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    isApproved
-                        ? 'Your residency has been verified. You can now submit cases.'
-                        : 'Barangay staff will review your submission.',
-                    style: const TextStyle(color: Color(0xFF607A9E)),
-                  ),
-                ],
+                const SizedBox(height: 4),
+                Text(hint, style: const TextStyle(color: Color(0xFF607A9E))),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoadErrorCard extends StatelessWidget {
+  const _LoadErrorCard({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    const color = Color(0xFFC43D35);
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.wifi_off_rounded, color: color),
+              SizedBox(width: 10),
+              Text(
+                'Could not load your status',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(message, style: const TextStyle(color: Color(0xFF607A9E))),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Retry'),
           ),
         ],
       ),
