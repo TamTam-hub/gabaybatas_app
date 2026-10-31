@@ -15,7 +15,7 @@ class GbBottomNav extends StatelessWidget {
     return NavigationBar(
       height: 72,
       animationDuration: const Duration(milliseconds: 380),
-      indicatorColor: const Color(0x1F2F6EFF),
+      indicatorColor: const Color(0x1F1A3A6B),
       selectedIndex: currentIndex,
       destinations: const [
         NavigationDestination(

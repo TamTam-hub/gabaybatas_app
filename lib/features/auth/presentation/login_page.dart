@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/main_shell.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/validation/input_validators.dart';
+import '../../../core/widgets/gb_logo_mark.dart';
 import '../data/auth_service.dart';
 import 'register_page.dart';
 
@@ -215,8 +216,8 @@ class _LoginPageState extends State<LoginPage> {
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Color(0xFF2F6EFF),
-                                    Color(0xFF1F49D8),
+                                    Color(0xFF24508F),
+                                    Color(0xFF0E2242),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -224,17 +225,14 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: const [
                                   BoxShadow(
-                                    color: Color(0x4D2F6EFF),
+                                    color: Color(0x4D1A3A6B),
                                     blurRadius: 14,
                                     offset: Offset(0, 6),
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.shield_outlined,
-                                color: Colors.white,
-                                size: 30,
-                              ),
+                              alignment: Alignment.center,
+                              child: const GbLogoMark(size: 40),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -244,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF2F6EFF),
+                              color: Color(0xFF1A3A6B),
                               letterSpacing: 0.2,
                             ),
                           ),
@@ -320,12 +318,12 @@ class _LoginPageState extends State<LoginPage> {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [Color(0xFF2F6EFF), Color(0xFF1F49D8)],
+                                colors: [Color(0xFF24508F), Color(0xFF0E2242)],
                               ),
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Color(0x402F6EFF),
+                                  color: Color(0x401A3A6B),
                                   blurRadius: 12,
                                   offset: Offset(0, 5),
                                 ),
@@ -449,7 +447,7 @@ class _LoginPageState extends State<LoginPage> {
                                 Icon(
                                   Icons.info_outline_rounded,
                                   size: 16,
-                                  color: Color(0xFF2F6EFF),
+                                  color: Color(0xFF1A3A6B),
                                 ),
                                 SizedBox(width: 7),
                                 Expanded(
@@ -528,12 +526,12 @@ class _PremiumBackdrop extends StatelessWidget {
           Positioned(
             top: -70,
             right: -60,
-            child: _blurCircle(const Color(0xFF2F6EFF), 220, 0.12),
+            child: _blurCircle(const Color(0xFF1A3A6B), 220, 0.12),
           ),
           Positioned(
             bottom: -90,
             left: -80,
-            child: _blurCircle(const Color(0xFF1F49D8), 260, 0.09),
+            child: _blurCircle(const Color(0xFF0E2242), 260, 0.09),
           ),
           Positioned(
             top: 190,

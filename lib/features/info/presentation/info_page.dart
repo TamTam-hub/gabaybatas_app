@@ -13,7 +13,7 @@ import '../../submit_case/presentation/submit_case_page.dart';
 import '../data/knowledge_base_service.dart';
 import 'report_guide_page.dart';
 
-const _blue = Color(0xFF2F6EFF);
+const _blue = Color(0xFF1A3A6B);
 const _green = Color(0xFF168548);
 const _orange = Color(0xFFB06B00);
 const _muted = Color(0xFF6680A5);
@@ -333,7 +333,7 @@ class _InfoPageState extends State<InfoPage> {
               selectedColor: _blue,
               backgroundColor: Colors.white,
               labelStyle: TextStyle(
-                color: _filter == key ? Colors.white : const Color(0xFF1F49D8),
+                color: _filter == key ? Colors.white : const Color(0xFF0E2242),
                 fontWeight: FontWeight.w600,
               ),
               side: const BorderSide(color: Color(0xFFD4E2FF)),
@@ -642,7 +642,7 @@ class _CategoryBadge extends StatelessWidget {
       child: Text(
         _displayCategory(category),
         style: const TextStyle(
-          color: Color(0xFF1F49D8),
+          color: Color(0xFF0E2242),
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -804,7 +804,7 @@ class _LegalInformationDetailPageState
             _WideButton(
               icon: Icons.send_rounded,
               label: 'File this complaint',
-              color: const Color(0xFF1F49D8),
+              color: const Color(0xFF0E2242),
               onPressed: _fileComplaint,
             ),
           if (widget.onViewDocument != null)

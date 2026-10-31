@@ -370,7 +370,7 @@ class _ChatPageState extends State<ChatPage> {
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF2F6EFF), Color(0xFF1F49D8)],
+                          colors: [Color(0xFF24508F), Color(0xFF0E2242)],
                         ),
                         borderRadius: BorderRadius.circular(15),
                       ),
@@ -403,7 +403,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bubbleColor = message.fromUser
-        ? const Color(0xFF1F49D8)
+        ? const Color(0xFF0E2242)
         : Colors.white;
     final textColor = message.fromUser ? Colors.white : const Color(0xFF22324F);
 
@@ -427,7 +427,7 @@ class _MessageBubble extends StatelessWidget {
               alignment: Alignment.center,
               child: const Icon(
                 Icons.support_agent_rounded,
-                color: Color(0xFF2F6EFF),
+                color: Color(0xFF1A3A6B),
                 size: 17,
               ),
             ),

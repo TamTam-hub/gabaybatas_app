@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/storage/session_store.dart';
 import '../core/theme/app_theme.dart';
+import '../core/widgets/gb_logo_mark.dart';
 import '../features/auth/presentation/login_page.dart';
 import '../features/auth/presentation/register_page.dart';
 import 'main_shell.dart';
@@ -87,7 +88,7 @@ class _StartupLoadingPage extends StatelessWidget {
                 width: 230,
                 height: 230,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2F6EFF).withValues(alpha: 0.12),
+                  color: const Color(0xFF1A3A6B).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -99,7 +100,7 @@ class _StartupLoadingPage extends StatelessWidget {
                 width: 190,
                 height: 190,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1F49D8).withValues(alpha: 0.12),
+                  color: const Color(0xFF0E2242).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -125,23 +126,19 @@ class _StartupLoadingPage extends StatelessWidget {
                             gradient: const LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [Color(0xFF2F6EFF), Color(0xFF1F49D8)],
+                              colors: [Color(0xFF24508F), Color(0xFF0E2242)],
                             ),
                             borderRadius: BorderRadius.circular(30),
                             boxShadow: const [
                               BoxShadow(
-                                color: Color(0x332F6EFF),
+                                color: Color(0x331A3A6B),
                                 blurRadius: 28,
                                 offset: Offset(0, 14),
                               ),
                             ],
                           ),
                           alignment: Alignment.center,
-                          child: const Icon(
-                            Icons.balance_rounded,
-                            color: Colors.white,
-                            size: 48,
-                          ),
+                          child: const GbLogoMark(size: 68),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -171,7 +168,7 @@ class _StartupLoadingPage extends StatelessWidget {
                           child: const LinearProgressIndicator(
                             minHeight: 6,
                             backgroundColor: Color(0xFFD9E5FF),
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2F6EFF)),
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A3A6B)),
                           ),
                         ),
                       ),

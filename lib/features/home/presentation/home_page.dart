@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/gb_blue_header.dart';
+import '../../../core/widgets/gb_logo_mark.dart';
 import '../../about/data/profile_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -77,7 +78,7 @@ class _HomePageState extends State<HomePage> {
           child: _ActionCard(
             title: 'Submit a Case',
             subtitle: 'Report your legal concern',
-            color: const Color(0xFF2F6EFF),
+            color: const Color(0xFF1A3A6B),
             icon: Icons.description_outlined,
             onTap: widget.onSubmitTap,
           ),
@@ -182,20 +183,20 @@ class _BrandLogoChip extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2F6EFF), Color(0xFF1F49D8)],
+          colors: [Color(0xFF24508F), Color(0xFF0E2242)],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white, width: 2),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x402F6EFF),
+            color: Color(0x401A3A6B),
             blurRadius: 16,
             offset: Offset(0, 8),
           ),
         ],
       ),
       alignment: Alignment.center,
-      child: const Icon(Icons.shield_outlined, color: Colors.white, size: 28),
+      child: const GbLogoMark(size: 36),
     );
   }
 }

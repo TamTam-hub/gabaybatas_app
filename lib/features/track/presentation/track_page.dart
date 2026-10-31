@@ -364,7 +364,7 @@ class _ProvideInfoSheetState extends State<_ProvideInfoSheet> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: const BorderSide(
-                          color: Color(0xFF2563EB),
+                          color: Color(0xFF1A3A6B),
                           width: 1.5,
                         ),
                       ),
@@ -449,7 +449,7 @@ class _ProvideInfoSheetState extends State<_ProvideInfoSheet> {
                     child: FilledButton(
                       onPressed: _isSubmitting ? null : _submit,
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: const Color(0xFF1A3A6B),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -606,7 +606,7 @@ class _TrackPageState extends State<TrackPage> {
     if (item.isAccepted) {
       return const Color(0xFF047857);
     }
-    return const Color(0xFF2F6EFF);
+    return const Color(0xFF1A3A6B);
   }
 
   Widget _buildKpStepper(CaseSummary item) {
@@ -635,7 +635,7 @@ class _TrackPageState extends State<TrackPage> {
                       color: i < currentStep
                           ? const Color(0xFF10B981)
                           : (i == currentStep
-                              ? const Color(0xFF2563EB)
+                              ? const Color(0xFF1A3A6B)
                               : const Color(0xFFE2E8F0)),
                     ),
                     child: Center(
@@ -1120,7 +1120,7 @@ class _TrackPageState extends State<TrackPage> {
                   label: const Text('Search Case'),
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF2F6EFF),
+                    foregroundColor: const Color(0xFF1A3A6B),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),

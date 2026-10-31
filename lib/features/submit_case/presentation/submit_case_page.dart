@@ -717,7 +717,7 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
                         _isSubmitting ? 'Submitting...' : 'Submit Case',
                       ),
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF1F49D8),
+                        backgroundColor: const Color(0xFF0E2242),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -750,7 +750,7 @@ class _FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF2F6EFF), size: 18),
+          Icon(icon, color: const Color(0xFF1A3A6B), size: 18),
           const SizedBox(width: 7),
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
@@ -784,7 +784,7 @@ class _StatementProgress extends StatelessWidget {
                 finished ? Icons.check_circle_rounded : Icons.edit_note_rounded,
                 color: finished
                     ? const Color(0xFF168548)
-                    : const Color(0xFF2F6EFF),
+                    : const Color(0xFF1A3A6B),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -801,7 +801,7 @@ class _StatementProgress extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: finished
                       ? const Color(0xFF168548)
-                      : const Color(0xFF2F6EFF),
+                      : const Color(0xFF1A3A6B),
                 ),
               ),
             ],
@@ -815,7 +815,7 @@ class _StatementProgress extends StatelessWidget {
               backgroundColor: const Color(0xFFD9E4F7),
               color: finished
                   ? const Color(0xFF22A45D)
-                  : const Color(0xFF2F6EFF),
+                  : const Color(0xFF1A3A6B),
             ),
           ),
         ],
@@ -851,7 +851,7 @@ class _StatementStep extends StatelessWidget {
         ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0D1F49D8),
+            color: Color(0x0D0E2242),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -870,7 +870,7 @@ class _StatementStep extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: complete
                       ? const Color(0xFF22A45D)
-                      : const Color(0xFF2F6EFF),
+                      : const Color(0xFF1A3A6B),
                 ),
                 child: complete
                     ? const Icon(Icons.check, size: 16, color: Colors.white)
@@ -929,7 +929,7 @@ class _LinkedValue extends StatelessWidget {
           Icon(
             empty ? Icons.arrow_upward_rounded : Icons.person_outline_rounded,
             size: 18,
-            color: empty ? const Color(0xFFB06B00) : const Color(0xFF2F6EFF),
+            color: empty ? const Color(0xFFB06B00) : const Color(0xFF1A3A6B),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -1029,7 +1029,7 @@ class _StepTextField extends StatelessWidget {
             ),
             border: border(const Color(0xFFB9D0F5)),
             enabledBorder: border(const Color(0xFFB9D0F5)),
-            focusedBorder: border(const Color(0xFF2F6EFF), 1.5),
+            focusedBorder: border(const Color(0xFF1A3A6B), 1.5),
           ),
         ),
       ],
@@ -1063,7 +1063,7 @@ class _StatementPreview extends StatelessWidget {
             fontWeight: FontWeight.w700,
             color: value.isEmpty
                 ? const Color(0xFFB0BED3)
-                : const Color(0xFF1F49D8),
+                : const Color(0xFF0E2242),
           ),
         );
 
@@ -1142,7 +1142,7 @@ class _InputShell extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD9E4F7)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0D1F49D8),
+            color: Color(0x0D0E2242),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),

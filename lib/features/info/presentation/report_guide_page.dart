@@ -55,7 +55,7 @@ class _GuideQuestion {
 const _red = Color(0xFFD93025);
 const _purple = Color(0xFF7B3FC4);
 const _orange = Color(0xFFB06B00);
-const _blue = Color(0xFF2F6EFF);
+const _blue = Color(0xFF1A3A6B);
 const _green = Color(0xFF168548);
 
 const _emergency = _GuideOutcome(
@@ -635,7 +635,7 @@ class _ReportGuidePageState extends State<ReportGuidePage> {
                 icon: const Icon(Icons.send_rounded),
                 label: const Text('Submit a Case'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF1F49D8),
+                  backgroundColor: const Color(0xFF0E2242),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
@@ -693,7 +693,7 @@ class _ChoiceButton extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F49D8),
+                    color: Color(0xFF0E2242),
                   ),
                 ),
               ),

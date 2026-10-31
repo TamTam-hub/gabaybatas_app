@@ -150,7 +150,7 @@ class _GbDropdownState extends State<GbDropdown> with SingleTickerProviderStateM
                                       ),
                                     ),
                                     if (isSelected)
-                                      const Icon(Icons.check_rounded, size: 18, color: Color(0xFF2F6EFF)),
+                                      const Icon(Icons.check_rounded, size: 18, color: Color(0xFF1A3A6B)),
                                   ],
                                 ),
                               ),
@@ -211,7 +211,7 @@ class _GbDropdownState extends State<GbDropdown> with SingleTickerProviderStateM
 
         final borderColor = hasError
             ? const Color(0xFFD93025)
-            : (_isOpen ? const Color(0xFF2F6EFF) : const Color(0xFFD9E4F7));
+            : (_isOpen ? const Color(0xFF1A3A6B) : const Color(0xFFD9E4F7));
 
         return CompositedTransformTarget(
           link: _layerLink,
@@ -254,7 +254,7 @@ class _GbDropdownState extends State<GbDropdown> with SingleTickerProviderStateM
                         duration: const Duration(milliseconds: 160),
                         child: const Icon(
                           Icons.keyboard_arrow_down_rounded,
-                          color: Color(0xFF2F6EFF),
+                          color: Color(0xFF1A3A6B),
                           size: 24,
                         ),
                       ),
@@ -309,7 +309,7 @@ class GbDropdownField extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xFF2F6EFF), size: 18),
+              Icon(icon, color: const Color(0xFF1A3A6B), size: 18),
               const SizedBox(width: 7),
               Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
             ],

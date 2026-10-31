@@ -32,7 +32,7 @@ class GbBlueHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2F6EFF), Color(0xFF2355E7), Color(0xFF1F49D8)],
+          colors: [Color(0xFF24508F), Color(0xFF1A3A6B), Color(0xFF0E2242)],
           stops: [0, 0.58, 1],
         ),
       ),
