@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../core/update/update_prompt.dart';
+import '../core/update/update_service.dart';
 import '../core/widgets/gb_bottom_nav.dart';
 import '../features/about/presentation/about_page.dart';
 import '../features/chat/presentation/chat_page.dart';
@@ -31,10 +34,23 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
   int _previousIndex = 0;
 
+  /// The update check runs once per app start, not on every return to the shell.
+  static bool _updateChecked = false;
+
   @override
   void initState() {
     super.initState();
     MainShell._tabRequest.addListener(_handleTabRequest);
+    if (kReleaseMode && !_updateChecked) {
+      _updateChecked = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _checkForUpdate());
+    }
+  }
+
+  Future<void> _checkForUpdate() async {
+    final update = await const UpdateService().checkForUpdate();
+    if (update == null || !mounted) return;
+    await showUpdatePrompt(context, update);
   }
 
   @override

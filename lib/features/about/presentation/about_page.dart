@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/storage/session_store.dart';
+import '../../../core/update/update_prompt.dart';
+import '../../../core/update/update_service.dart';
 import '../../../core/widgets/gb_blue_header.dart';
 import '../../../core/widgets/gb_dialog.dart';
 import '../../../core/validation/input_validators.dart';
@@ -34,6 +37,8 @@ class _AboutPageState extends State<AboutPage> {
   bool _isEditingProfile = false;
   bool _isSavingProfile = false;
   bool _isLoadingProfile = false;
+  bool _isCheckingUpdate = false;
+  String _appVersion = '';
   String? _profileError;
 
   ProfileData? _loadedProfile;
@@ -48,6 +53,9 @@ class _AboutPageState extends State<AboutPage> {
   @override
   void initState() {
     super.initState();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _appVersion = info.version);
+    });
     _loadProfile();
     _loadVerificationStatus();
   }
@@ -198,6 +206,20 @@ class _AboutPageState extends State<AboutPage> {
           _isSavingProfile = false;
         });
       }
+    }
+  }
+
+  Future<void> _checkForUpdate() async {
+    setState(() => _isCheckingUpdate = true);
+    final update = await const UpdateService().checkForUpdate();
+    if (!mounted) return;
+    setState(() => _isCheckingUpdate = false);
+    if (update != null) {
+      await showUpdatePrompt(context, update);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You have the latest version.')),
+      );
     }
   }
 
@@ -545,6 +567,35 @@ class _AboutPageState extends State<AboutPage> {
               const Text(
                 'christianalbos237@gmail.com',
                 style: TextStyle(color: Color(0xFF5F7396)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'App Version',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _appVersion.isEmpty ? '—' : 'Version $_appVersion',
+                      style: const TextStyle(color: Color(0xFF5F7396)),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: _isCheckingUpdate ? null : _checkForUpdate,
+                    icon: _isCheckingUpdate
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.system_update_rounded, size: 18),
+                    label: Text(
+                      _isCheckingUpdate ? 'Checking...' : 'Check for updates',
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
             ],
