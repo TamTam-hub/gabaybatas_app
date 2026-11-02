@@ -18,8 +18,9 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? body,
     bool authenticated = false,
+    Duration? timeout,
   }) async {
-    return _request('POST', path, body: body, authenticated: authenticated);
+    return _request('POST', path, body: body, authenticated: authenticated, timeout: timeout);
   }
 
   Future<Map<String, dynamic>> put(
@@ -143,8 +144,10 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? body,
     required bool authenticated,
+    Duration? timeout,
   }) async {
     final uri = _buildUri(path);
+    final limit = timeout ?? AppConfig.requestTimeout;
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -167,7 +170,7 @@ class ApiClient {
         case 'POST':
           response = await http
               .post(uri, headers: headers, body: jsonEncode(body ?? <String, dynamic>{}))
-              .timeout(AppConfig.requestTimeout);
+              .timeout(limit);
           break;
         case 'PUT':
           response = await http
