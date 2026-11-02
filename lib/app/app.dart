@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 import '../core/storage/session_store.dart';
 import '../core/theme/app_theme.dart';
-import '../core/widgets/gb_logo_mark.dart';
 import '../features/auth/presentation/login_page.dart';
 import '../features/auth/presentation/register_page.dart';
 import 'main_shell.dart';
@@ -43,7 +43,10 @@ class _StartupGateState extends State<_StartupGate> {
   }
 
   Future<String?> _resolveStartup() async {
-    return SessionStore.getToken();
+    // Read the session while the splash animation plays its intro.
+    final token = SessionStore.getToken();
+    await Future<void>.delayed(const Duration(milliseconds: 3000));
+    return token;
   }
 
   @override
@@ -65,8 +68,36 @@ class _StartupGateState extends State<_StartupGate> {
   }
 }
 
-class _StartupLoadingPage extends StatelessWidget {
+class _StartupLoadingPage extends StatefulWidget {
   const _StartupLoadingPage();
+
+  @override
+  State<_StartupLoadingPage> createState() => _StartupLoadingPageState();
+}
+
+class _StartupLoadingPageState extends State<_StartupLoadingPage>
+    with SingleTickerProviderStateMixin {
+  // splash_logo.json: intro runs to frame 96 of 156, then 96–156 loops gently.
+  static const double _loopStart = 96 / 156;
+
+  late final AnimationController _logo = AnimationController(vsync: this);
+
+  @override
+  void dispose() {
+    _logo.dispose();
+    super.dispose();
+  }
+
+  void _startLogo(LottieComposition composition) {
+    _logo.duration = composition.duration;
+    if (MediaQuery.of(context).disableAnimations) {
+      _logo.value = _loopStart;
+      return;
+    }
+    _logo.animateTo(_loopStart).then((_) {
+      if (mounted) _logo.repeat(min: _loopStart, max: 1);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +107,7 @@ class _StartupLoadingPage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFF3F7FF), Color(0xFFE7EFFF)],
+            colors: [Color(0xFFF3F7FF), Color(0xFFE5EDFC)],
           ),
         ),
         child: Stack(
@@ -88,7 +119,7 @@ class _StartupLoadingPage extends StatelessWidget {
                 width: 230,
                 height: 230,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A3A6B).withValues(alpha: 0.12),
+                  color: const Color(0xFF1F5BC4).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -100,7 +131,7 @@ class _StartupLoadingPage extends StatelessWidget {
                 width: 190,
                 height: 190,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0E2242).withValues(alpha: 0.12),
+                  color: const Color(0xFF1A4CA3).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -112,42 +143,30 @@ class _StartupLoadingPage extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TweenAnimationBuilder<double>(
-                        tween: Tween<double>(begin: 0.94, end: 1),
-                        duration: const Duration(milliseconds: 1200),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, value, child) {
-                          return Transform.scale(scale: value, child: child);
-                        },
-                        child: Container(
-                          width: 104,
-                          height: 104,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Color(0xFF24508F), Color(0xFF0E2242)],
-                            ),
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x331A3A6B),
-                                blurRadius: 28,
-                                offset: Offset(0, 14),
-                              ),
-                            ],
+                      // The animation is twice the tile's size so its rings
+                      // can spread; the tile itself stays 104 px.
+                      SizedBox(
+                        width: 104,
+                        height: 104,
+                        child: OverflowBox(
+                          maxWidth: 208,
+                          maxHeight: 208,
+                          child: Lottie.asset(
+                            'assets/animations/splash_logo.json',
+                            controller: _logo,
+                            width: 208,
+                            height: 208,
+                            onLoaded: _startLogo,
                           ),
-                          alignment: Alignment.center,
-                          child: const GbLogoMark(size: 68),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       const Text(
                         'GabayBatas',
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF17356A),
+                          color: Color(0xFF173F8A),
                           letterSpacing: 0.2,
                         ),
                       ),
@@ -167,8 +186,8 @@ class _StartupLoadingPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(999),
                           child: const LinearProgressIndicator(
                             minHeight: 6,
-                            backgroundColor: Color(0xFFD9E5FF),
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A3A6B)),
+                            backgroundColor: Color(0xFFD8E4FA),
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1F5BC4)),
                           ),
                         ),
                       ),

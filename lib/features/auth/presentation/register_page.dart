@@ -134,7 +134,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     Icons.arrow_back_ios_new_rounded,
                                     size: 16,
                                   ),
-                                  color: const Color(0xFF1A3A6B),
+                                  color: const Color(0xFF1F5BC4),
                                 ),
                               ),
                               const Spacer(),
@@ -142,7 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 'GabayBatas',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
-                                  color: Color(0xFF1A3A6B),
+                                  color: Color(0xFF1F5BC4),
                                   fontSize: 16,
                                 ),
                               ),
@@ -312,12 +312,12 @@ class _RegisterPageState extends State<RegisterPage> {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [Color(0xFF24508F), Color(0xFF0E2242)],
+                                colors: [Color(0xFF2F6FD8), Color(0xFF1A4CA3)],
                               ),
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Color(0x4D1A3A6B),
+                                  color: Color(0x4D1F5BC4),
                                   blurRadius: 14,
                                   offset: Offset(0, 6),
                                 ),
@@ -451,12 +451,12 @@ class _Backdrop extends StatelessWidget {
           Positioned(
             top: -80,
             right: -70,
-            child: _blurCircle(const Color(0xFF1A3A6B), 230, 0.11),
+            child: _blurCircle(const Color(0xFF1F5BC4), 230, 0.11),
           ),
           Positioned(
             bottom: -90,
             left: -80,
-            child: _blurCircle(const Color(0xFF0E2242), 250, 0.09),
+            child: _blurCircle(const Color(0xFF1A4CA3), 250, 0.09),
           ),
           Positioned(
             top: 210,

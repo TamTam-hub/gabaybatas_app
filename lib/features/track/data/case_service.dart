@@ -31,6 +31,65 @@ class CaseTimelineItem {
     );
   }
 }
+
+/// One resubmission by the resident (changed reason, photos added or removed).
+class ResidentUpdate {
+  const ResidentUpdate({required this.details, required this.eventAt});
+
+  final String details;
+  final String eventAt;
+
+  factory ResidentUpdate.fromJson(dynamic json) {
+    if (json is Map) {
+      return ResidentUpdate(
+        details: (json['details'] ?? '').toString().trim(),
+        eventAt: (json['event_at'] ?? '').toString(),
+      );
+    }
+    return ResidentUpdate(details: json.toString().trim(), eventAt: '');
+  }
+}
+
+/// The parts of the complaint statement built when the case was filed
+/// ("Ako po hi ..., tungod ..."), so the reason can be corrected on its own.
+class ComplaintStatement {
+  const ComplaintStatement({
+    required this.name,
+    required this.age,
+    required this.area,
+    required this.respondent,
+    required this.respondentArea,
+    required this.reason,
+  });
+
+  final String name;
+  final String age;
+  final String area;
+  final String respondent;
+  final String respondentArea;
+  final String reason;
+
+  static final RegExp _pattern = RegExp(
+    r'^Ako po hi (.+?), (\d+) anyos, ngan naukoy ha (.+?)\. Ginrereklamo ko hi (.+?), nga naukoy ha (.+?), tungod (.+?)\. '
+    r'Karuyag ko unta ipatawag hiya ha barangay basi magkastorya kami hin maopay\.',
+    dotAll: true,
+  );
+
+  /// Null for free-text complaints of older cases.
+  static ComplaintStatement? parse(String text) {
+    final match = _pattern.firstMatch(text.trim());
+    if (match == null) return null;
+    return ComplaintStatement(
+      name: match.group(1)!,
+      age: match.group(2)!,
+      area: match.group(3)!,
+      respondent: match.group(4)!,
+      respondentArea: match.group(5)!,
+      reason: match.group(6)!,
+    );
+  }
+}
+
 class CaseSummary {
   CaseSummary({
     required this.caseRowId,
@@ -51,11 +110,17 @@ class CaseSummary {
     this.reviewDecision = '',
     this.reviewNotes = '',
     this.missingItems = '',
-    this.residentUpdates = const <String>[],
+    this.referralDestination = '',
+    this.referralDetails = '',
+    this.residentUpdates = const <ResidentUpdate>[],
     this.timeline = const <CaseTimelineItem>[],
     this.nextHearingDate = '',
     this.nextHearingType = '',
     this.nextHearingLocation = '',
+    this.nextHearingTime = '',
+    this.nextHearingPurpose = '',
+    this.nextHearingPurposeType = '',
+    this.statusMessage = '',
     required this.createdAt,
     required this.updatedAt,
     required this.evidence,
@@ -79,19 +144,37 @@ class CaseSummary {
   final String reviewDecision;
   final String reviewNotes;
   final String missingItems;
-  final List<String> residentUpdates;
+  final String referralDestination;
+  final String referralDetails;
+  final List<ResidentUpdate> residentUpdates;
   final List<CaseTimelineItem> timeline;
   final String nextHearingDate;
   final String nextHearingType;
   final String nextHearingLocation;
+  final String nextHearingTime;
+  final String nextHearingPurpose;
+
+  /// regular, explanation_complainant, explanation_respondent,
+  /// pangkat_constitution or execution.
+  final String nextHearingPurposeType;
+
+  /// What the current status means for the resident, in plain words.
+  final String statusMessage;
   final String createdAt;
   final String updatedAt;
   final List<CaseEvidence> evidence;
 
+  /// The complaint as written by the system when the case was filed, without
+  /// the "[Resident Update ...]" notes older cases added to its end.
+  String get complaintStatement {
+    final text = description.trim();
+    final cut = text.indexOf(RegExp(r'\s*\[Resident Update - '));
+    return (cut >= 0 ? text.substring(0, cut) : text).trim();
+  }
+
   String get caseIdDigits => referenceNumber.replaceAll(RegExp(r'\D'), '');
 
-  bool get hasActionRequired =>
-      kpStatus == 'additional_info_required';
+  bool get hasActionRequired => kpStatus == 'additional_info_required';
 
   bool get isUnderReview => kpStatus == 'under_review';
 
@@ -100,34 +183,34 @@ class CaseSummary {
 
   /// The case has reached its legal conclusion at the barangay.
   bool get isConcluded => const {
-        'not_eligible',
-        'referred',
-        'certified_to_court',
-        'dismissed',
-        'closed',
-      }.contains(kpStatus);
+    'not_eligible',
+    'referred',
+    'certified_to_court',
+    'dismissed',
+    'closed',
+  }.contains(kpStatus);
 
   /// Concluded without a barangay settlement (not covered, dismissed, or
   /// certified to file in court).
   bool get isUnsettledOutcome => const {
-        'not_eligible',
-        'dismissed',
-        'certified_to_court',
-      }.contains(kpStatus);
+    'not_eligible',
+    'dismissed',
+    'certified_to_court',
+  }.contains(kpStatus);
 
   /// A settlement or award has been reached (including its finality,
   /// compliance and execution phases).
   bool get isSettledOutcome => const {
-        'mediation_settled',
-        'conciliation_settled',
-        'arbitration_awarded',
-        'settlement_repudiation',
-        'settlement_final',
-        'compliance_monitoring',
-        'execution_pending',
-        'execution_completed',
-        'closed',
-      }.contains(kpStatus);
+    'mediation_settled',
+    'conciliation_settled',
+    'arbitration_awarded',
+    'settlement_repudiation',
+    'settlement_final',
+    'compliance_monitoring',
+    'execution_pending',
+    'execution_completed',
+    'closed',
+  }.contains(kpStatus);
 
   /// Progress step for the resident stepper:
   /// 0 Filed, 1 Review, 2 Mediation (hearings), 3 Resolution.
@@ -232,30 +315,53 @@ class CaseSummary {
       reviewDecision: (json['review_decision'] ?? '').toString(),
       reviewNotes: (json['review_notes'] ?? '').toString(),
       missingItems: (json['missing_items'] ?? '').toString(),
-      residentUpdates: (json['resident_updates'] is List
-              ? json['resident_updates'] as List
-              : const <dynamic>[])
-          .map((value) => value.toString().trim())
-          .where((value) => value.isNotEmpty)
-          .toList(),
-      timeline: (json['timeline'] is List
-              ? json['timeline'] as List
-              : const <dynamic>[])
-          .whereType<Map<String, dynamic>>()
-          .map(CaseTimelineItem.fromJson)
-          .toList(),
-      nextHearingDate: ((json['next_hearing'] is Map)
-              ? json['next_hearing']['date'] ?? ''
-              : '')
-          .toString(),
-      nextHearingType: ((json['next_hearing'] is Map)
-              ? json['next_hearing']['stage'] ?? ''
-              : '')
-          .toString(),
-      nextHearingLocation: ((json['next_hearing'] is Map)
-              ? json['next_hearing']['location'] ?? ''
-              : '')
-          .toString(),
+      referralDestination: (json['referral_destination'] ?? '').toString(),
+      referralDetails: (json['referral_details'] ?? '').toString(),
+      residentUpdates:
+          (json['resident_updates'] is List
+                  ? json['resident_updates'] as List
+                  : const <dynamic>[])
+              .map(ResidentUpdate.fromJson)
+              .where((update) => update.details.isNotEmpty)
+              .toList(),
+      timeline:
+          (json['timeline'] is List
+                  ? json['timeline'] as List
+                  : const <dynamic>[])
+              .whereType<Map<String, dynamic>>()
+              .map(CaseTimelineItem.fromJson)
+              .toList(),
+      nextHearingDate:
+          ((json['next_hearing'] is Map)
+                  ? json['next_hearing']['date'] ?? ''
+                  : '')
+              .toString(),
+      nextHearingType:
+          ((json['next_hearing'] is Map)
+                  ? json['next_hearing']['stage'] ?? ''
+                  : '')
+              .toString(),
+      nextHearingLocation:
+          ((json['next_hearing'] is Map)
+                  ? json['next_hearing']['location'] ?? ''
+                  : '')
+              .toString(),
+      nextHearingTime:
+          ((json['next_hearing'] is Map)
+                  ? json['next_hearing']['time'] ?? ''
+                  : '')
+              .toString(),
+      nextHearingPurpose:
+          ((json['next_hearing'] is Map)
+                  ? json['next_hearing']['purpose'] ?? ''
+                  : '')
+              .toString(),
+      nextHearingPurposeType:
+          ((json['next_hearing'] is Map)
+                  ? json['next_hearing']['purpose_type'] ?? ''
+                  : '')
+              .toString(),
+      statusMessage: (json['status_message'] ?? '').toString(),
       createdAt: (json['created_at'] ?? '').toString(),
       updatedAt: (json['updated_at'] ?? '').toString(),
       evidence:
@@ -323,12 +429,16 @@ class CaseService {
 
   Future<CaseListResult> listCases({
     String? status,
+    String? group,
     int limit = 10,
     int offset = 0,
   }) async {
     final query = <String, String>{'limit': '$limit', 'offset': '$offset'};
     if (status != null && status.isNotEmpty && status != 'all') {
       query['status'] = status;
+    }
+    if (group != null && group.isNotEmpty && group != 'all') {
+      query['group'] = group;
     }
 
     final params = query.entries
@@ -358,7 +468,9 @@ class CaseService {
   Future<Map<String, dynamic>> updateCase({
     required int caseId,
     String? additionalInfo,
+    String? reason,
     String? complainedPerson,
+    List<int> removeEvidenceIds = const <int>[],
     List<String> evidenceImagePaths = const <String>[],
     String? evidenceVideoPath,
   }) async {
@@ -368,6 +480,9 @@ class CaseService {
         'case_id': caseId.toString(),
         if (additionalInfo != null && additionalInfo.trim().isNotEmpty)
           'additional_info': additionalInfo.trim(),
+        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+        if (removeEvidenceIds.isNotEmpty)
+          'remove_evidence_ids': removeEvidenceIds.join(','),
         if (complainedPerson != null && complainedPerson.trim().isNotEmpty)
           'complained_person': complainedPerson.trim(),
       },

@@ -182,13 +182,13 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
 
   /// Parts of the complaint statement filled in (names come from above).
   int get _statementPartsDone => <bool>[
-        _fullName.text.trim().length >= 3,
-        _complainantAge.text.trim().isNotEmpty,
-        _complainantLocation.text.trim().isNotEmpty,
-        _complainedPerson.text.trim().length >= 3,
-        _respondentLocation.text.trim().isNotEmpty,
-        _description.text.trim().length >= 10,
-      ].where((done) => done).length;
+    _fullName.text.trim().length >= 3,
+    _complainantAge.text.trim().isNotEmpty,
+    _complainantLocation.text.trim().isNotEmpty,
+    _complainedPerson.text.trim().length >= 3,
+    _respondentLocation.text.trim().isNotEmpty,
+    _description.text.trim().length >= 10,
+  ].where((done) => done).length;
 
   bool get _isResidentVerified =>
       _verification?.status.trim().toLowerCase() == 'approved';
@@ -236,7 +236,7 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
     });
 
     try {
-      final result = await _submitCaseService.submitCase(
+      await _submitCaseService.submitCase(
         name: _fullName.text.trim(),
         complainantAddress: _complainantAddress.text.trim(),
         complainantLocation: _complainantLocation.text.trim(),
@@ -255,8 +255,7 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
 
       if (!mounted) return;
 
-      final message =
-          'Case ${result.referenceNumber} submitted successfully. Status: ${result.status}';
+      const message = 'Case Submitted Successfully';
       widget.onSubmitted?.call(message);
       if (mounted) Navigator.of(context).pop();
     } on ApiException catch (error) {
@@ -496,7 +495,7 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
                   ),
                 const _FieldLabel(
                   icon: Icons.subject_rounded,
-                  label: 'Reason of Complaint',
+                  label: 'Reason of Complaint (In Waray Dialect)',
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
@@ -508,7 +507,8 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
                 _StatementStep(
                   step: 1,
                   title: 'About you',
-                  complete: _fullName.text.trim().length >= 3 &&
+                  complete:
+                      _fullName.text.trim().length >= 3 &&
                       _complainantAge.text.trim().isNotEmpty &&
                       _complainantLocation.text.trim().isNotEmpty,
                   children: [
@@ -561,7 +561,8 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
                 _StatementStep(
                   step: 2,
                   title: 'Who you are complaining about',
-                  complete: _complainedPerson.text.trim().length >= 3 &&
+                  complete:
+                      _complainedPerson.text.trim().length >= 3 &&
                       _respondentLocation.text.trim().isNotEmpty,
                   children: [
                     _LinkedValue(
@@ -590,7 +591,7 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
                   complete: _description.text.trim().length >= 10,
                   children: [
                     _StepTextField(
-                      label: 'Reason of complaint',
+                      label: 'Reason of Complaint (In Waray Dialect)',
                       controller: _description,
                       hintText:
                           'Describe what they did, when and where it happened.',
@@ -717,7 +718,7 @@ class _SubmitCasePageState extends State<SubmitCasePage> {
                         _isSubmitting ? 'Submitting...' : 'Submit Case',
                       ),
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF0E2242),
+                        backgroundColor: const Color(0xFF1A4CA3),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -750,7 +751,7 @@ class _FieldLabel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF1A3A6B), size: 18),
+          Icon(icon, color: const Color(0xFF1F5BC4), size: 18),
           const SizedBox(width: 7),
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
@@ -784,7 +785,7 @@ class _StatementProgress extends StatelessWidget {
                 finished ? Icons.check_circle_rounded : Icons.edit_note_rounded,
                 color: finished
                     ? const Color(0xFF168548)
-                    : const Color(0xFF1A3A6B),
+                    : const Color(0xFF1F5BC4),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -792,7 +793,10 @@ class _StatementProgress extends StatelessWidget {
                   finished
                       ? 'Your complaint statement is complete.'
                       : 'Answer 3 short steps. We will write your complaint for you.',
-                  style: const TextStyle(color: Color(0xFF49658F), height: 1.35),
+                  style: const TextStyle(
+                    color: Color(0xFF49658F),
+                    height: 1.35,
+                  ),
                 ),
               ),
               Text(
@@ -801,7 +805,7 @@ class _StatementProgress extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   color: finished
                       ? const Color(0xFF168548)
-                      : const Color(0xFF1A3A6B),
+                      : const Color(0xFF1F5BC4),
                 ),
               ),
             ],
@@ -815,7 +819,7 @@ class _StatementProgress extends StatelessWidget {
               backgroundColor: const Color(0xFFD9E4F7),
               color: finished
                   ? const Color(0xFF22A45D)
-                  : const Color(0xFF1A3A6B),
+                  : const Color(0xFF1F5BC4),
             ),
           ),
         ],
@@ -851,7 +855,7 @@ class _StatementStep extends StatelessWidget {
         ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0D0E2242),
+            color: Color(0x0D1A4CA3),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -870,7 +874,7 @@ class _StatementStep extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: complete
                       ? const Color(0xFF22A45D)
-                      : const Color(0xFF1A3A6B),
+                      : const Color(0xFF1F5BC4),
                 ),
                 child: complete
                     ? const Icon(Icons.check, size: 16, color: Colors.white)
@@ -929,7 +933,7 @@ class _LinkedValue extends StatelessWidget {
           Icon(
             empty ? Icons.arrow_upward_rounded : Icons.person_outline_rounded,
             size: 18,
-            color: empty ? const Color(0xFFB06B00) : const Color(0xFF1A3A6B),
+            color: empty ? const Color(0xFFB06B00) : const Color(0xFF1F5BC4),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -938,7 +942,10 @@ class _LinkedValue extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF7D91B2)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF7D91B2),
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1029,7 +1036,7 @@ class _StepTextField extends StatelessWidget {
             ),
             border: border(const Color(0xFFB9D0F5)),
             enabledBorder: border(const Color(0xFFB9D0F5)),
-            focusedBorder: border(const Color(0xFF1A3A6B), 1.5),
+            focusedBorder: border(const Color(0xFF1F5BC4), 1.5),
           ),
         ),
       ],
@@ -1058,14 +1065,14 @@ class _StatementPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextSpan blank(String value) => TextSpan(
-          text: value.isEmpty ? '________' : value,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: value.isEmpty
-                ? const Color(0xFFB0BED3)
-                : const Color(0xFF0E2242),
-          ),
-        );
+      text: value.isEmpty ? '________' : value,
+      style: TextStyle(
+        fontWeight: FontWeight.w700,
+        color: value.isEmpty
+            ? const Color(0xFFB0BED3)
+            : const Color(0xFF1A4CA3),
+      ),
+    );
 
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 0, 20, 6),
@@ -1142,7 +1149,7 @@ class _InputShell extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD9E4F7)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0D0E2242),
+            color: Color(0x0D1A4CA3),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),

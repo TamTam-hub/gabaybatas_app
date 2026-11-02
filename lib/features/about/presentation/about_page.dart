@@ -298,7 +298,7 @@ class _AboutPageState extends State<AboutPage> {
                 height: 86,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF24508F), Color(0xFF0E2242)],
+                    colors: [Color(0xFF2F6FD8), Color(0xFF1A4CA3)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -336,7 +336,7 @@ class _AboutPageState extends State<AboutPage> {
                 child: Text(
                   'Resident • $_selectedBarangay',
                   style: const TextStyle(
-                    color: Color(0xFF1A3A6B),
+                    color: Color(0xFF1F5BC4),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -515,7 +515,7 @@ class _AboutPageState extends State<AboutPage> {
                 text: 'Submit legal cases and concerns',
               ),
               const _Bullet(
-                color: Color(0xFF1A3A6B),
+                color: Color(0xFF1F5BC4),
                 text: 'Track case status in real-time',
               ),
               const _Bullet(

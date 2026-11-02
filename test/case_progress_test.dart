@@ -61,4 +61,44 @@ void main() {
     expect(concluded.kpDisposition, 'cfa_conciliation_failed');
     expect(concluded.kpDispositionLabel, isNotEmpty);
   });
+
+  test('complaint statement is split so the reason can be corrected', () {
+    final statement = ComplaintStatement.parse(
+      'Ako po hi Christian Albos, 23 anyos, ngan naukoy ha Brgy. Muñoz. Ginrereklamo ko hi Juan Tamad, '
+      'nga naukoy ha Brgy. Muñoz, tungod TEST 02 hehe. Karuyag ko unta ipatawag hiya ha barangay basi magkastorya kami hin maopay.'
+      '\n\n[Resident Update - Oct 31, 2026 09:18 PM]:\nGin tagan ko hiya dolse',
+    );
+    expect(statement, isNotNull);
+    expect(statement!.respondent, 'Juan Tamad');
+    expect(statement.reason, 'TEST 02 hehe');
+    expect(ComplaintStatement.parse('Free-text complaint of an older case.'), isNull);
+  });
+
+  test('complaint text leaves out older resident update notes', () {
+    final item = CaseSummary.fromJson({
+      'description': 'Ako po hi Ana, 23 anyos. Karuyag ko unta ipatawag hiya.'
+          '\n\n[Resident Update - Oct 31, 2026 09:18 PM]:\nGin tagan ko hiya dolse',
+      'evidence': <dynamic>[],
+    });
+    expect(item.complaintStatement, 'Ako po hi Ana, 23 anyos. Karuyag ko unta ipatawag hiya.');
+    expect(caseWith('closed', 'disposition').progressStep, 3);
+  });
+
+  test('resident updates, referral and hearing time are parsed', () {
+    final item = CaseSummary.fromJson({
+      'reference_number': 'C-0002',
+      'resident_updates': [
+        {'details': 'Added 1 photo.', 'event_at': '2026-10-31T21:18:07+08:00'},
+        'Older plain update',
+      ],
+      'referral_destination': 'PNP',
+      'referral_details': 'VAWC case',
+      'next_hearing': {'date': '2026-11-03', 'time': '10:00:00', 'stage': 'mediation', 'location': 'Barangay Hall'},
+      'evidence': <dynamic>[],
+    });
+    expect(item.residentUpdates.map((u) => u.details), ['Added 1 photo.', 'Older plain update']);
+    expect(item.residentUpdates.first.eventAt, isNotEmpty);
+    expect(item.referralDestination, 'PNP');
+    expect(item.nextHearingTime, '10:00:00');
+  });
 }

@@ -216,8 +216,8 @@ class _LoginPageState extends State<LoginPage> {
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Color(0xFF24508F),
-                                    Color(0xFF0E2242),
+                                    Color(0xFF2F6FD8),
+                                    Color(0xFF1A4CA3),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -225,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(18),
                                 boxShadow: const [
                                   BoxShadow(
-                                    color: Color(0x4D1A3A6B),
+                                    color: Color(0x4D1F5BC4),
                                     blurRadius: 14,
                                     offset: Offset(0, 6),
                                   ),
@@ -242,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A3A6B),
+                              color: Color(0xFF1F5BC4),
                               letterSpacing: 0.2,
                             ),
                           ),
@@ -318,12 +318,12 @@ class _LoginPageState extends State<LoginPage> {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [Color(0xFF24508F), Color(0xFF0E2242)],
+                                colors: [Color(0xFF2F6FD8), Color(0xFF1A4CA3)],
                               ),
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Color(0x401A3A6B),
+                                  color: Color(0x401F5BC4),
                                   blurRadius: 12,
                                   offset: Offset(0, 5),
                                 ),
@@ -447,7 +447,7 @@ class _LoginPageState extends State<LoginPage> {
                                 Icon(
                                   Icons.info_outline_rounded,
                                   size: 16,
-                                  color: Color(0xFF1A3A6B),
+                                  color: Color(0xFF1F5BC4),
                                 ),
                                 SizedBox(width: 7),
                                 Expanded(
@@ -526,12 +526,12 @@ class _PremiumBackdrop extends StatelessWidget {
           Positioned(
             top: -70,
             right: -60,
-            child: _blurCircle(const Color(0xFF1A3A6B), 220, 0.12),
+            child: _blurCircle(const Color(0xFF1F5BC4), 220, 0.12),
           ),
           Positioned(
             bottom: -90,
             left: -80,
-            child: _blurCircle(const Color(0xFF0E2242), 260, 0.09),
+            child: _blurCircle(const Color(0xFF1A4CA3), 260, 0.09),
           ),
           Positioned(
             top: 190,

@@ -29,6 +29,7 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
   @override
   void initState() {
@@ -50,9 +51,50 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _onTabSelected(int index) {
+    if (index == _currentIndex) return;
     setState(() {
+      _previousIndex = _currentIndex;
       _currentIndex = index;
     });
+  }
+
+  /// Fade-through: the old tab fades out quickly, then the new one fades in
+  /// with a short slide toward the side of the tab that was tapped.
+  Widget _tabTransition(Widget child, Animation<double> animation) {
+    final direction = _currentIndex >= _previousIndex ? 1.0 : -1.0;
+    final incoming = child.key == ValueKey<int>(_currentIndex);
+
+    if (incoming) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.3, 1, curve: Curves.easeOutCubic),
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset(0.04 * direction, 0),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    }
+
+    // Outgoing: the animation runs 1 → 0, so this fades out in the first 30%.
+    return FadeTransition(
+      opacity: CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.7, 1, curve: Curves.easeIn),
+      ),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: Offset(-0.02 * direction, 0),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      ),
+    );
   }
 
   @override
@@ -86,26 +128,11 @@ class _MainShellState extends State<MainShell> {
 
     return Scaffold(
       body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 320),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, animation) {
-          final slide =
-              Tween<Offset>(
-                begin: const Offset(0.06, 0),
-                end: Offset.zero,
-              ).animate(
-                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-              );
-
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(position: slide, child: child),
-          );
-        },
+        duration: const Duration(milliseconds: 340),
+        transitionBuilder: _tabTransition,
         child: KeyedSubtree(
           key: ValueKey<int>(_currentIndex),
-          child: pages[_currentIndex],
+          child: RepaintBoundary(child: pages[_currentIndex]),
         ),
       ),
       bottomNavigationBar: GbBottomNav(

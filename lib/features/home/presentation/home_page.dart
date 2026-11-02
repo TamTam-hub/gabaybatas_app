@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
           child: _ActionCard(
             title: 'Submit a Case',
             subtitle: 'Report your legal concern',
-            color: const Color(0xFF1A3A6B),
+            color: const Color(0xFF1F5BC4),
             icon: Icons.description_outlined,
             onTap: widget.onSubmitTap,
           ),
@@ -183,13 +183,13 @@ class _BrandLogoChip extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF24508F), Color(0xFF0E2242)],
+          colors: [Color(0xFF2F6FD8), Color(0xFF1A4CA3)],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white, width: 2),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x401A3A6B),
+            color: Color(0x401F5BC4),
             blurRadius: 16,
             offset: Offset(0, 8),
           ),
