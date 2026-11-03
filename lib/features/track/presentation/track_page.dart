@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:typed_data';
 
+import '../../../app/main_shell.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/widgets/gb_blue_header.dart';
 import '../../../core/widgets/gb_dropdown.dart';
@@ -874,12 +875,19 @@ class _TrackPageState extends State<TrackPage> {
   void initState() {
     super.initState();
     _loadCases(reset: true);
+    MainShell.shownTab.addListener(_onTabShown);
   }
 
   @override
   void dispose() {
+    MainShell.shownTab.removeListener(_onTabShown);
     _queryController.dispose();
     super.dispose();
+  }
+
+  /// The tab stays alive between visits, so it refreshes when shown again.
+  void _onTabShown() {
+    if (MainShell.shownTab.value == MainShell.trackTab) _refreshCases();
   }
 
   Future<void> _loadCases({required bool reset}) async {

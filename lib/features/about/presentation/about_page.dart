@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../../app/main_shell.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/storage/session_store.dart';
@@ -58,6 +59,15 @@ class _AboutPageState extends State<AboutPage> {
     });
     _loadProfile();
     _loadVerificationStatus();
+    MainShell.shownTab.addListener(_onTabShown);
+  }
+
+  /// The tab stays alive between visits; the verification status may have
+  /// changed (staff approve it on the website), the profile form is kept.
+  void _onTabShown() {
+    if (MainShell.shownTab.value == MainShell.profileTab) {
+      _loadVerificationStatus();
+    }
   }
 
   Future<void> _loadVerificationStatus() async {
@@ -81,6 +91,7 @@ class _AboutPageState extends State<AboutPage> {
 
   @override
   void dispose() {
+    MainShell.shownTab.removeListener(_onTabShown);
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();

@@ -201,27 +201,45 @@ class _BrandLogoChip extends StatelessWidget {
   }
 }
 
-class _AnimatedItem extends StatelessWidget {
+/// Fades and lifts a card in once. Uses transitions (no rebuild per frame).
+class _AnimatedItem extends StatefulWidget {
   const _AnimatedItem({required this.child, required this.delay});
 
   final Widget child;
   final int delay;
 
   @override
+  State<_AnimatedItem> createState() => _AnimatedItemState();
+}
+
+class _AnimatedItemState extends State<_AnimatedItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: Duration(milliseconds: 360 + widget.delay),
+  )..forward();
+  late final Animation<double> _curve = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: Duration(milliseconds: 360 + delay),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, _) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 18 * (1 - value)),
-            child: child,
-          ),
-        );
-      },
+    return FadeTransition(
+      opacity: _curve,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.08),
+          end: Offset.zero,
+        ).animate(_curve),
+        child: widget.child,
+      ),
     );
   }
 }
