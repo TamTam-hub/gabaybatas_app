@@ -52,6 +52,8 @@ class GeminiService {
       body: <String, dynamic>{
         'message': message,
         'context': context,
+        // This app shows the Submit a Case button the assistant may suggest.
+        'submit_button': true,
         'history': [
           for (final item in history)
             {'role': item.fromUser ? 'user' : 'model', 'text': item.content},

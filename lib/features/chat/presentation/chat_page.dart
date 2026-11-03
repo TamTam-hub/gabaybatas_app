@@ -2,10 +2,12 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../core/config/case_types.dart';
 import '../../../core/widgets/gb_blue_header.dart';
 import '../../../core/widgets/gb_dialog.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../services/gemini_service.dart';
+import '../../submit_case/presentation/submit_case_page.dart';
 import '../data/chat_service.dart';
 
 class ChatPage extends StatefulWidget {
@@ -64,10 +66,9 @@ class _ChatPageState extends State<ChatPage> {
           ..clear()
           ..addAll(
             history.map(
-              (message) => _ChatMessage(
-                fromUser: message.fromUser,
-                content: message.content,
-              ),
+              (message) => message.fromUser
+                  ? _ChatMessage(fromUser: true, content: message.content)
+                  : _ChatMessage.fromReply(message.content),
             ),
           );
         _isLoadingHistory = false;
@@ -211,8 +212,27 @@ class _ChatPageState extends State<ChatPage> {
         : '${normalized.substring(0, 48).trimRight()}...';
   }
 
-  Future<void> _typeAssistantReply(String reply) async {
+  void _openSubmitCase(String? caseType) {
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SubmitCasePage(
+          initialCaseType: caseType,
+          onSubmitted: (message) => messenger.showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: const Color(0xFF168548),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _typeAssistantReply(String rawReply) async {
     if (!mounted) return;
+    final parsed = _ChatMessage.fromReply(rawReply);
+    final reply = parsed.content;
     setState(() {
       _isTypingReply = true;
       _messages.add(const _ChatMessage(fromUser: false, content: ''));
@@ -246,7 +266,10 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
     if (mounted) {
-      setState(() => _isTypingReply = false);
+      setState(() {
+        _messages[_messages.length - 1] = parsed;
+        _isTypingReply = false;
+      });
     }
   }
 
@@ -285,7 +308,10 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                     ..._messages.map(
-                      (message) => _MessageBubble(message: message),
+                      (message) => _MessageBubble(
+                        message: message,
+                        onSubmitCase: () => _openSubmitCase(message.caseType),
+                      ),
                     ),
                     if (_isSending && !_isTypingReply)
                       const _MessageBubble(
@@ -396,9 +422,10 @@ class _ChatPageState extends State<ChatPage> {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message});
+  const _MessageBubble({required this.message, this.onSubmitCase});
 
   final _ChatMessage message;
+  final VoidCallback? onSubmitCase;
 
   @override
   Widget build(BuildContext context) {
@@ -460,6 +487,22 @@ class _MessageBubble extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
+                  if (message.suggestsSubmitCase && onSubmitCase != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: 4),
+                      child: FilledButton.icon(
+                        onPressed: onSubmitCase,
+                        icon: const Icon(Icons.send_rounded, size: 17),
+                        label: const Text('Submit a Case'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF1A4CA3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -771,8 +814,32 @@ class _RenameConversationDialogState extends State<_RenameConversationDialog> {
 }
 
 class _ChatMessage {
-  const _ChatMessage({required this.fromUser, required this.content});
+  const _ChatMessage({
+    required this.fromUser,
+    required this.content,
+    this.suggestsSubmitCase = false,
+    this.caseType,
+  });
+
+  /// An AI reply. The assistant ends a reply with `[SUBMIT_CASE: Case Type]`
+  /// when it recommends filing at the barangay; the tag is hidden and shown
+  /// as a Submit a Case button instead.
+  factory _ChatMessage.fromReply(String reply) {
+    final match = _submitTag.firstMatch(reply);
+    if (match == null) return _ChatMessage(fromUser: false, content: reply);
+    final caseType = match.group(1)?.trim();
+    return _ChatMessage(
+      fromUser: false,
+      content: reply.replaceAll(_submitTag, '').trim(),
+      suggestsSubmitCase: true,
+      caseType: kCaseTypes.contains(caseType) ? caseType : null,
+    );
+  }
+
+  static final RegExp _submitTag = RegExp(r'\[SUBMIT_CASE:?\s*([^\]]*)\]');
 
   final bool fromUser;
   final String content;
+  final bool suggestsSubmitCase;
+  final String? caseType;
 }
