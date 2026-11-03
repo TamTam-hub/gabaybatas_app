@@ -31,6 +31,11 @@ and download the new APK from the release.
    - **Description:** what changed, in plain words. Residents see it in the update prompt.
    - **Attach** the APK, renamed to `gabaybatas-v1.0.2.apk`
    - Leave **Set as a pre-release** unticked, then **Publish release**.
+   With the GitHub CLI (installed and signed in once with `gh auth login`), step 4 is one command:
+   ```
+   copy build\app\outputs\flutter-apk\app-release.apk gabaybatas-v1.0.2.apk
+   gh release create v1.0.2 gabaybatas-v1.0.2.apk --repo TamTam-hub/gabaybatas_app --title "GabayBatas 1.0.2" --notes "What changed, in plain words"
+   ```
 5. Open the app on a phone with the previous version: the update prompt should appear.
    (Profile → **Check for updates** checks on demand.)
 
