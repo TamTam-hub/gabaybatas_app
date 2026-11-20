@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:typed_data';
 
+import '../../payment/presentation/payment_page.dart';
 import '../../../app/main_shell.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/widgets/gb_blue_header.dart';
@@ -961,6 +962,18 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
+  Future<void> _openPayment(CaseSummary item) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final message = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => PaymentPage(caseId: item.referenceNumber)),
+    );
+    if (!mounted || message == null) return;
+    messenger.showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: const Color(0xFF168548)),
+    );
+    _refreshCases();
+  }
+
   String _caseIdDisplay(CaseSummary item) {
     if (item.referenceNumber.isNotEmpty) {
       return item.referenceNumber;
@@ -972,10 +985,10 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   Color _getBadgeBackgroundColor(CaseSummary item) {
-    if (item.hasActionRequired) {
+    if (item.hasActionRequired || item.needsPayment) {
       return const Color(0xFFFEF3C7);
     }
-    if (item.isUnderReview) {
+    if (item.isUnderReview || item.paymentPending) {
       return const Color(0xFFEFF6FF);
     }
     if (item.isUnsettledOutcome) {
@@ -991,10 +1004,10 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   Color _getBadgeTextColor(CaseSummary item) {
-    if (item.hasActionRequired) {
+    if (item.hasActionRequired || item.needsPayment) {
       return const Color(0xFFB45309);
     }
-    if (item.isUnderReview) {
+    if (item.isUnderReview || item.paymentPending) {
       return const Color(0xFF1D4ED8);
     }
     if (item.isUnsettledOutcome) {
@@ -1232,6 +1245,33 @@ class _TrackPageState extends State<TrackPage> {
                       if (item.statusMessage.isNotEmpty &&
                           !item.hasActionRequired) ...[
                         _StatusMessage(item: item),
+                        const SizedBox(height: 10),
+                      ],
+                      if (item.needsPayment) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              Navigator.of(sheetContext).pop();
+                              _openPayment(item);
+                            },
+                            icon: const Icon(
+                              Icons.account_balance_wallet_rounded,
+                              size: 18,
+                            ),
+                            label: Text(
+                              'Pay Filing Fee (${item.payment?.amountLabel ?? ''})',
+                            ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF1A4CA3),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 10),
                       ],
                       // Official Barangay Notice (if action required or notes exist)
@@ -1659,6 +1699,74 @@ class _TrackPageState extends State<TrackPage> {
                                     ),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: const Color(0xFFD97706),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      visualDensity: VisualDensity.compact,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ] else if (item.needsPayment) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF5FF),
+                              border: Border.all(
+                                color: const Color(0xFFB9D0F5),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.receipt_long_rounded,
+                                      color: Color(0xFF1A4CA3),
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        item.payment?.status == 'rejected'
+                                            ? 'Payment not verified. Please pay the ${item.payment?.amountLabel ?? ''} filing fee again.'
+                                            : 'Filing fee: ${item.payment?.amountLabel ?? ''}. Pay to have your complaint accepted.',
+                                        style: const TextStyle(
+                                          color: Color(0xFF1C3D7A),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton.icon(
+                                    onPressed: () => _openPayment(item),
+                                    icon: const Icon(
+                                      Icons.account_balance_wallet_rounded,
+                                      size: 16,
+                                    ),
+                                    label: const Text('Pay Filing Fee'),
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: const Color(0xFF1A4CA3),
                                       foregroundColor: Colors.white,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 8,

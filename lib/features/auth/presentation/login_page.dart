@@ -90,7 +90,9 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.message)));
-    } catch (_) {
+    } catch (error) {
+      // Google's own error code (for example ApiException: 10) explains the failure.
+      debugPrint('Google sign-in failed: $error');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -90,6 +90,85 @@ class ComplaintStatement {
   }
 }
 
+/// The filing fee of a case: asked for once the barangay finds the complaint
+/// covered; the case is accepted when staff verify the payment.
+class CasePayment {
+  const CasePayment({
+    required this.required,
+    required this.amountLabel,
+    required this.status,
+    required this.rejectReason,
+    required this.referenceNumber,
+  });
+
+  /// The case is waiting for the fee.
+  final bool required;
+  final String amountLabel;
+
+  /// none, submitted (being checked), verified or rejected.
+  final String status;
+  final String rejectReason;
+  final String referenceNumber;
+
+  static CasePayment? fromJson(dynamic json) {
+    if (json is! Map) return null;
+    return CasePayment(
+      required: json['required'] == true,
+      amountLabel: (json['amount_label'] ?? '').toString(),
+      status: (json['status'] ?? 'none').toString(),
+      rejectReason: (json['reject_reason'] ?? '').toString(),
+      referenceNumber: (json['reference_number'] ?? '').toString(),
+    );
+  }
+}
+
+/// What the payment page shows: the amount and the barangay's GCash account.
+class PaymentInfo {
+  const PaymentInfo({
+    required this.caseId,
+    required this.paymentRequired,
+    required this.amountLabel,
+    required this.accountName,
+    required this.number,
+    required this.qrAvailable,
+    required this.note,
+    required this.latestStatus,
+    required this.latestRejectReason,
+  });
+
+  final String caseId;
+  final bool paymentRequired;
+  final String amountLabel;
+  final String accountName;
+  final String number;
+  final bool qrAvailable;
+
+  /// Goes in the GCash message so the barangay can match the payment.
+  final String note;
+  final String latestStatus;
+  final String latestRejectReason;
+
+  /// The amount without the peso sign and separators, for pasting in GCash.
+  String get amountDigits => amountLabel.replaceAll(RegExp(r'[^0-9.]'), '');
+
+  factory PaymentInfo.fromJson(Map<String, dynamic> json) {
+    final latest = json['latest_payment'] is Map
+        ? json['latest_payment'] as Map
+        : const <String, dynamic>{};
+    return PaymentInfo(
+      caseId: (json['case_id'] ?? '').toString(),
+      paymentRequired: json['payment_required'] == true,
+      amountLabel: (json['amount_label'] ?? '').toString(),
+      accountName: (json['account_name'] ?? '').toString(),
+      number: (json['number'] ?? '').toString(),
+      qrAvailable: json['qr_available'] == true,
+      note: (json['note'] ?? '').toString(),
+      latestStatus: (latest['status'] ?? 'none').toString(),
+      latestRejectReason: (latest['reject_reason'] ?? '').toString(),
+    );
+  }
+}
+
 class CaseSummary {
   CaseSummary({
     required this.caseRowId,
@@ -121,6 +200,7 @@ class CaseSummary {
     this.nextHearingPurpose = '',
     this.nextHearingPurposeType = '',
     this.statusMessage = '',
+    this.payment,
     required this.createdAt,
     required this.updatedAt,
     required this.evidence,
@@ -160,6 +240,9 @@ class CaseSummary {
 
   /// What the current status means for the resident, in plain words.
   final String statusMessage;
+
+  /// Null when the case never needed the filing fee.
+  final CasePayment? payment;
   final String createdAt;
   final String updatedAt;
   final List<CaseEvidence> evidence;
@@ -175,6 +258,14 @@ class CaseSummary {
   String get caseIdDigits => referenceNumber.replaceAll(RegExp(r'\D'), '');
 
   bool get hasActionRequired => kpStatus == 'additional_info_required';
+
+  /// The filing fee is due and no payment is being checked.
+  bool get needsPayment =>
+      kpStatus == 'awaiting_payment' && payment?.status != 'submitted';
+
+  /// The resident paid; the barangay is checking the payment.
+  bool get paymentPending =>
+      kpStatus == 'awaiting_payment' && payment?.status == 'submitted';
 
   bool get isUnderReview => kpStatus == 'under_review';
 
@@ -236,6 +327,8 @@ class CaseSummary {
         return 'Under Review';
       case 'additional_info_required':
         return 'Additional Info Required';
+      case 'awaiting_payment':
+        return paymentPending ? 'Payment Being Checked' : 'Filing Fee Needed';
       case 'accepted':
         return 'Accepted for KP';
       case 'referred':
@@ -362,6 +455,7 @@ class CaseSummary {
                   : '')
               .toString(),
       statusMessage: (json['status_message'] ?? '').toString(),
+      payment: CasePayment.fromJson(json['payment']),
       createdAt: (json['created_at'] ?? '').toString(),
       updatedAt: (json['updated_at'] ?? '').toString(),
       evidence:
@@ -463,6 +557,40 @@ class CaseService {
           .map(CaseSummary.fromJson)
           .toList(),
     );
+  }
+
+  Future<PaymentInfo> loadPaymentInfo(String caseId) async {
+    final response = await _apiClient.get(
+      '/api/v1/payment_info.php?case_id=${Uri.encodeQueryComponent(caseId)}',
+      authenticated: true,
+    );
+    final data = response['data'] is Map<String, dynamic>
+        ? response['data'] as Map<String, dynamic>
+        : <String, dynamic>{};
+    return PaymentInfo.fromJson(data);
+  }
+
+  Future<Uint8List> loadPaymentQr() {
+    return _apiClient.getBytes('/api/v1/payment_qr.php', authenticated: true);
+  }
+
+  /// Sends the GCash receipt screenshot; returns the barangay's message.
+  Future<String> submitPayment({
+    required String caseId,
+    required String screenshotPath,
+    String referenceNumber = '',
+  }) async {
+    final response = await _apiClient.postMultipart(
+      '/api/v1/payment_submit.php',
+      fields: <String, String>{
+        'case_id': caseId,
+        if (referenceNumber.trim().isNotEmpty)
+          'reference_number': referenceNumber.trim(),
+      },
+      filePaths: <String, String>{'screenshot': screenshotPath},
+      authenticated: true,
+    );
+    return (response['message'] ?? 'Payment sent.').toString();
   }
 
   Future<Map<String, dynamic>> updateCase({
